@@ -33,6 +33,7 @@ interface UseGameOptions {
 interface UseGameReturn {
   state: GameState;
   isRolling: boolean;
+  isThinking: boolean;
   moveAnalysis: MoveAnalysis[] | null;
   roll: () => void;
   placeDie: (column: ColumnIndex) => void;
@@ -57,6 +58,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     }
   }, [options.initialState]);
   const [isRolling, setIsRolling] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const [moveAnalysis, setMoveAnalysis] = useState<MoveAnalysis[] | null>(null);
   const [isTrainingMode, setIsTrainingMode] = useState(
     options.trainingMode ?? false,
@@ -125,6 +127,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       }
 
       isProcessingAITurn.current = true;
+      setIsThinking(true);
 
       // Clear any pending AI timeout
       if (aiTimeoutRef.current) {
@@ -156,6 +159,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
               if (result) {
                 setState(result.newState);
                 isProcessingAITurn.current = false;
+                setIsThinking(false);
                 if (isTrainingMode) {
                   runMoveAnalysis(result.newState);
                 }
@@ -167,9 +171,11 @@ export function useGame(options: UseGameOptions): UseGameReturn {
                 }
               } else {
                 isProcessingAITurn.current = false;
+                setIsThinking(false);
               }
             } else {
               isProcessingAITurn.current = false;
+              setIsThinking(false);
             }
           }, 400);
         } else if (currentState.phase === "placing") {
@@ -179,6 +185,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
             if (result) {
               setState(result.newState);
               isProcessingAITurn.current = false;
+              setIsThinking(false);
               if (isTrainingMode) {
                 runMoveAnalysis(result.newState);
               }
@@ -189,12 +196,15 @@ export function useGame(options: UseGameOptions): UseGameReturn {
               }
             } else {
               isProcessingAITurn.current = false;
+              setIsThinking(false);
             }
           } else {
             isProcessingAITurn.current = false;
+            setIsThinking(false);
           }
         } else {
           isProcessingAITurn.current = false;
+          setIsThinking(false);
         }
       }, 500);
     },
@@ -268,6 +278,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       clearTimeout(aiTimeoutRef.current);
     }
     isProcessingAITurn.current = false;
+    setIsThinking(false);
     const newState = createInitialState();
     setState(newState);
     setMoveAnalysis(null);
@@ -297,6 +308,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
   return {
     state,
     isRolling,
+    isThinking,
     moveAnalysis,
     roll,
     placeDie,

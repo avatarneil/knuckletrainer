@@ -160,6 +160,7 @@ function AIVsAIContent() {
         <GameBoard
           state={game.state}
           isRolling={game.isRolling}
+          isThinking={game.isThinking}
           onRoll={() => {}} // No manual roll in AI vs AI mode
           onColumnClick={() => {}} // No manual placement in AI vs AI mode
           player1Name={`Player 1 (${DIFFICULTY_CONFIGS[player1Difficulty].name})`}
