@@ -68,11 +68,13 @@ export class AIPlayer {
   /**
    * Choose a move for the current game state
    */
-  chooseMove(state: GameState): ColumnIndex | null {
+  chooseMove(state: GameState, opponentDifficulty?: DifficultyLevel): ColumnIndex | null {
     try {
       const config = getDifficultyConfig(this.difficulty);
+      const opponentConfig = opponentDifficulty ? getDifficultyConfig(opponentDifficulty) : undefined;
       
       // Try WASM first if available (synchronous, non-blocking)
+      // Note: WASM doesn't support different opponent configs yet, so it uses the same config
       if (state.phase === "placing" && state.currentDie !== null) {
         const wasmMove = getBestMoveWasm(
           state.grids.player1,
@@ -91,7 +93,7 @@ export class AIPlayer {
       }
       
       // Fallback to TypeScript implementation
-      const move = getBestMove(state, config);
+      const move = getBestMove(state, config, opponentConfig);
       
       // Fallback: if expectimax fails, use a simple heuristic
       if (move === null && state.phase === "placing" && state.currentDie !== null) {
@@ -168,11 +170,15 @@ export function createAIPlayer(
 export function getAIMove(
   state: GameState,
   difficulty: DifficultyLevel = "medium",
+  opponentDifficulty?: DifficultyLevel,
 ): ColumnIndex | null {
   try {
     const config = getDifficultyConfig(difficulty);
+    const opponentConfig = opponentDifficulty ? getDifficultyConfig(opponentDifficulty) : undefined;
     
     // Try WASM first if available (synchronous, non-blocking)
+    // Note: WASM doesn't support different opponent configs yet, so it uses the same config
+    // This is acceptable for backward compatibility but may not be accurate in simulation mode
     if (state.phase === "placing" && state.currentDie !== null) {
       const wasmMove = getBestMoveWasm(
         state.grids.player1,
@@ -191,7 +197,7 @@ export function getAIMove(
     }
     
     // Fallback to TypeScript implementation
-    const move = getBestMove(state, config);
+    const move = getBestMove(state, config, opponentConfig);
     
     // Fallback: if expectimax fails, use a simple heuristic
     if (move === null && state.phase === "placing" && state.currentDie !== null) {
