@@ -53,7 +53,6 @@ export function scheduleTask(
   let cancelled = false;
   let timeoutId: ReturnType<typeof setTimeout> | null = null;
   let idleId: number | null = null;
-  let taskController: TaskController | null = null;
   
   const execute = () => {
     if (!cancelled) {
@@ -66,7 +65,6 @@ export function scheduleTask(
     try {
       const scheduler = (globalThis as any).scheduler;
       const signal = new AbortController();
-      taskController = signal as any;
       
       scheduler.postTask(execute, {
         priority,
