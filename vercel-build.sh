@@ -40,6 +40,6 @@ if [ ! -f "wasm/pkg/knucklebones_ai_bg.wasm" ]; then
     exit 1
 fi
 
-# Build Next.js app
+# Build Next.js app (explicitly use webpack for WASM support)
 echo "Building Next.js app..."
-next build
+next build --webpack

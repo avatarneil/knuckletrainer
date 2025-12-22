@@ -3,6 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
+  // Explicitly use webpack for WASM support (Turbopack doesn't fully support WASM yet)
   webpack: (config, { isServer }) => {
     // Enable WASM support
     config.experiments = {
@@ -18,6 +19,8 @@ const nextConfig: NextConfig = {
     
     return config;
   },
+  // Add empty turbopack config to silence warning (we're using webpack)
+  turbopack: {},
 };
 
 export default nextConfig;

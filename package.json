@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run build:wasm:release && next build",
+    "build": "npm run build:wasm:release && next build --webpack",
     "build:wasm": "cd wasm && wasm-pack build --target web --out-dir pkg",
     "build:wasm:release": "cd wasm && wasm-pack build --target web --out-dir pkg --release",
     "build:wasm:check": "command -v wasm-pack >/dev/null 2>&1 && npm run build:wasm:release || echo 'WASM build skipped: wasm-pack not found'",
