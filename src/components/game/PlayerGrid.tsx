@@ -53,7 +53,7 @@ export function PlayerGrid({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-1 sm:gap-3 p-2 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300",
+        "flex flex-col items-center gap-[clamp(0.25rem,1.5vmin,1rem)] p-[clamp(0.5rem,2vmin,1.25rem)] rounded-xl sm:rounded-2xl transition-all duration-300",
         isCurrentPlayer && !isOpponent && "ring-2 ring-accent/50 bg-accent/5",
       )}
     >
@@ -81,7 +81,7 @@ export function PlayerGrid({
       {/* Grid */}
       <div
         className={cn(
-          "flex gap-1 sm:gap-2 p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-card/50 backdrop-blur border border-border/50",
+          "flex gap-[clamp(0.25rem,1.5vmin,1rem)] p-[clamp(0.375rem,2vmin,1rem)] rounded-lg sm:rounded-xl bg-card/50 backdrop-blur border border-border/50",
         )}
       >
         {ALL_COLUMNS.map((colIndex) => (

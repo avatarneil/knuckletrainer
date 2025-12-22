@@ -56,7 +56,7 @@ export function GameBoard({
   const player2Score = calculateGridScore(state.grids.player2);
 
   return (
-    <div className="flex flex-col items-center gap-2 sm:gap-4 md:gap-6 w-full max-w-2xl mx-auto">
+    <div className="flex flex-col items-center justify-between flex-1 w-full max-w-[min(95vw,900px)] mx-auto py-2">
       {/* Opponent grid (player2 shown at top) */}
       <PlayerGrid
         grid={state.grids.player2}
@@ -72,7 +72,7 @@ export function GameBoard({
       />
 
       {/* Center section: Score + Dice */}
-      <div className="flex flex-col items-center gap-2 sm:gap-4">
+      <div className="flex flex-col items-center gap-[clamp(0.5rem,1.5vmin,1rem)]">
         <ScoreCard
           player1Score={player1Score}
           player2Score={player2Score}

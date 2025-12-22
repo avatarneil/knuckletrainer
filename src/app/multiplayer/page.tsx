@@ -370,7 +370,7 @@ export default function MultiplayerPage() {
       </div>
 
       {/* Game Board */}
-      <div className="flex-1 flex items-center justify-center min-h-0">
+      <div className="flex-1 flex flex-col min-h-0">
         <GameBoard
           state={multiplayer.gameState}
           isRolling={isRolling}

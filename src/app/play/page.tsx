@@ -128,7 +128,7 @@ function PlayContent() {
       </div>
 
       {/* Game Board with Training Panel */}
-      <div className="flex-1 flex items-center justify-center gap-4 sm:gap-6 min-h-0">
+      <div className="flex-1 flex flex-col min-h-0">
         <GameBoard
           state={game.state}
           isRolling={game.isRolling}
@@ -142,11 +142,11 @@ function PlayContent() {
           showProbabilities={game.isTrainingMode}
         />
 
-        {/* Training Mode Panel */}
+        {/* Training Mode Panel - shown below on mobile, would need different layout for desktop */}
         {game.isTrainingMode &&
           game.state.phase === "placing" &&
           game.state.currentPlayer === "player1" && (
-            <div className="hidden lg:block w-72">
+            <div className="hidden lg:absolute lg:right-4 lg:top-1/2 lg:-translate-y-1/2 lg:block w-72">
               <WinProbability
                 analysis={game.moveAnalysis ?? []}
                 onSelectColumn={(col: ColumnIndex) => game.placeDie(col)}

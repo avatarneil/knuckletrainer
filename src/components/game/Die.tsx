@@ -13,9 +13,9 @@ interface DieProps {
 }
 
 const sizeClasses = {
-  sm: "w-6 h-6 text-xs sm:w-8 sm:h-8 sm:text-sm",
-  md: "w-9 h-9 text-base sm:w-12 sm:h-12 sm:text-lg",
-  lg: "w-12 h-12 text-xl sm:w-16 sm:h-16 sm:text-2xl",
+  sm: "w-[clamp(1.5rem,5vmin,2.5rem)] h-[clamp(1.5rem,5vmin,2.5rem)] text-xs",
+  md: "w-[clamp(2.25rem,8vmin,5rem)] h-[clamp(2.25rem,8vmin,5rem)] text-base",
+  lg: "w-[clamp(3rem,10vmin,6rem)] h-[clamp(3rem,10vmin,6rem)] text-xl",
 };
 
 const dieColors: Record<DieValue, string> = {
