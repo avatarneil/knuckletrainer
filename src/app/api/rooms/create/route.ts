@@ -16,6 +16,7 @@ import {
 
 interface CreateRoomRequest {
   playerName: string;
+  isPublic?: boolean;
 }
 
 export async function POST(request: Request) {
@@ -39,6 +40,10 @@ export async function POST(request: Request) {
       rematchRequested: null,
       createdAt: Date.now(),
       lastActivity: Date.now(),
+      isPublic: body.isPublic ?? false,
+      gameType: "multiplayer",
+      watchers: [],
+      followedBy: [],
     };
 
     // Save room and player session

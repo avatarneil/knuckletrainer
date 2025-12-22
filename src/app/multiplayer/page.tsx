@@ -4,6 +4,8 @@ import {
   ArrowLeft,
   Check,
   Copy,
+  Eye,
+  EyeOff,
   Loader2,
   LogOut,
   RotateCcw,
@@ -34,6 +36,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 
 type LobbyState = "menu" | "creating" | "waiting" | "joining" | "playing";
@@ -45,6 +48,7 @@ export default function MultiplayerPage() {
   const [copied, setCopied] = useState(false);
   const [showGameOver, setShowGameOver] = useState(false);
   const [isRolling, setIsRolling] = useState(false);
+  const [isPublic, setIsPublic] = useState(false);
 
   const multiplayer = useMultiplayer();
 
@@ -81,7 +85,7 @@ export default function MultiplayerPage() {
     if (!playerName.trim()) return;
     setLobbyState("creating");
     try {
-      await multiplayer.createRoom(playerName);
+      await multiplayer.createRoom(playerName, isPublic);
       setLobbyState("waiting");
     } catch (err) {
       console.error(err);
@@ -203,7 +207,32 @@ export default function MultiplayerPage() {
                   Start a new game and invite a friend
                 </CardDescription>
               </CardHeader>
-              <CardContent className="pb-4 sm:pb-6">
+              <CardContent className="space-y-3 sm:space-y-4 pb-4 sm:pb-6">
+                {/* Public/Private Toggle */}
+                <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    {isPublic ? (
+                      <Eye className="w-4 h-4 text-accent" />
+                    ) : (
+                      <EyeOff className="w-4 h-4 text-muted-foreground" />
+                    )}
+                    <div className="flex flex-col">
+                      <Label htmlFor="public-room" className="text-sm font-medium cursor-pointer">
+                        {isPublic ? "Public Room" : "Private Room"}
+                      </Label>
+                      <span className="text-xs text-muted-foreground">
+                        {isPublic
+                          ? "Anyone can watch this match"
+                          : "Only players can access"}
+                      </span>
+                    </div>
+                  </div>
+                  <Switch
+                    id="public-room"
+                    checked={isPublic}
+                    onCheckedChange={setIsPublic}
+                  />
+                </div>
                 <Button
                   onClick={handleCreateRoom}
                   disabled={!playerName.trim() || !multiplayer.isConnected}

@@ -24,7 +24,7 @@ interface UseMultiplayerReturn {
   // Room
   roomId: string | null;
   role: Player | null;
-  createRoom: (playerName: string) => Promise<string>;
+  createRoom: (playerName: string, isPublic?: boolean) => Promise<string>;
   joinRoom: (roomId: string, playerName: string) => Promise<boolean>;
   leaveRoom: () => void;
 
@@ -202,12 +202,12 @@ export function useMultiplayer(): UseMultiplayerReturn {
 
   // Create room
   const createRoom = useCallback(
-    async (playerName: string): Promise<string> => {
+    async (playerName: string, isPublic = false): Promise<string> => {
       try {
         const response = await fetch("/api/rooms/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ playerName }),
+          body: JSON.stringify({ playerName, isPublic }),
         });
 
         const data = await response.json();

@@ -23,6 +23,10 @@ export interface GameRoom {
   rematchRequested: Player | null;
   createdAt: number;
   lastActivity: number;
+  isPublic: boolean;
+  gameType: "multiplayer" | "ai";
+  watchers?: string[]; // Array of watcher tokens
+  followedBy?: string[]; // Array of watcher tokens who want to follow to next match
 }
 
 /** Player session stored in KV (maps token to room) */
@@ -137,5 +141,30 @@ export function getPublicRoomState(room: GameRoom) {
     player2: room.player2 ? { name: room.player2.name } : null,
     rematchRequested: room.rematchRequested,
     lastActivity: room.lastActivity,
+    isPublic: room.isPublic,
+    gameType: room.gameType,
+    watcherCount: room.watchers?.length ?? 0,
   };
+}
+
+/**
+ * Get all public rooms
+ */
+export async function getPublicRooms(): Promise<GameRoom[]> {
+  // Note: This is a simplified implementation. In production, you'd want
+  // to use Redis SCAN or maintain a separate index of public rooms
+  // For now, we'll need to scan all rooms (this is not efficient for large scale)
+  // In a real implementation, you'd maintain a sorted set or list of public room IDs
+  const keys = await kv.keys(`${ROOM_PREFIX}*`);
+  const rooms: GameRoom[] = [];
+  
+  for (const key of keys) {
+    const room = await kv.get<GameRoom>(key);
+    if (room && room.isPublic && room.state.phase !== "ended") {
+      rooms.push(room);
+    }
+  }
+  
+  // Sort by last activity (most recent first)
+  return rooms.sort((a, b) => b.lastActivity - a.lastActivity);
 }

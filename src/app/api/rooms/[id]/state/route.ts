@@ -58,6 +58,7 @@ export async function GET(
       isMyTurn,
       opponentDisconnected,
       isWaitingForOpponent: room.player1 === null || room.player2 === null,
+      followedBy: room.followedBy || [],
     });
   } catch (error) {
     console.error("Error getting room state:", error);
