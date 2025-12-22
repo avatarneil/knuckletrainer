@@ -87,25 +87,6 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     onStateChangeRef.current?.(state);
   }, [state]);
 
-  // Trigger AI moves when it's an AI player's turn
-  useEffect(() => {
-    const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";
-    if (!isAIMode || state.phase === "ended" || isProcessingAITurn.current) {
-      return;
-    }
-
-    const isPlayer2AI = options.mode === "ai" && state.currentPlayer === "player2";
-    const isPlayer1AI = options.mode === "ai-vs-ai" && state.currentPlayer === "player1";
-    const isPlayer2AIVsAI = options.mode === "ai-vs-ai" && state.currentPlayer === "player2";
-
-    if (isPlayer2AI || isPlayer1AI || isPlayer2AIVsAI) {
-      // Only trigger if we're not already rolling (to avoid double triggers)
-      if (state.phase !== "rolling" || !isRolling) {
-        handleAITurn(state);
-      }
-    }
-  }, [state, options.mode, handleAITurn, isRolling]);
-
   const runMoveAnalysis = useCallback((gameState: GameState) => {
     // Only run analysis for human player in AI mode
     if (
@@ -219,6 +200,25 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     },
     [options, difficulty, isTrainingMode, runMoveAnalysis],
   );
+
+  // Trigger AI moves when it's an AI player's turn
+  useEffect(() => {
+    const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";
+    if (!isAIMode || state.phase === "ended" || isProcessingAITurn.current) {
+      return;
+    }
+
+    const isPlayer2AI = options.mode === "ai" && state.currentPlayer === "player2";
+    const isPlayer1AI = options.mode === "ai-vs-ai" && state.currentPlayer === "player1";
+    const isPlayer2AIVsAI = options.mode === "ai-vs-ai" && state.currentPlayer === "player2";
+
+    if (isPlayer2AI || isPlayer1AI || isPlayer2AIVsAI) {
+      // Only trigger if we're not already rolling (to avoid double triggers)
+      if (state.phase !== "rolling" || !isRolling) {
+        handleAITurn(state);
+      }
+    }
+  }, [state, options.mode, handleAITurn, isRolling]);
 
   const roll = useCallback(() => {
     if (state.phase !== "rolling") return;
