@@ -16,6 +16,7 @@ interface CreateAIRoomRequest {
   playerName: string;
   difficulty: string;
   initialState?: any; // GameState
+  followedBy?: string[]; // Array of watcher tokens to migrate from previous match
 }
 
 export async function POST(request: Request) {
