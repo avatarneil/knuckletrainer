@@ -334,14 +334,14 @@ function SimulationContent() {
 
       {/* Game Viewer Dialog */}
       <Dialog open={showViewer} onOpenChange={setShowViewer}>
-        <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>Game Replay</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="max-w-4xl h-[90vh] sm:h-[85vh] max-h-[90vh] flex flex-col p-3 sm:p-6 m-2 sm:m-0 w-[calc(100vw-1rem)] sm:w-full top-[50%] sm:top-[50%] left-[50%] sm:left-[50%] translate-x-[-50%] translate-y-[-50%] sm:translate-x-[-50%] sm:translate-y-[-50%]">
+          <DialogHeader className="flex-shrink-0 pb-2 sm:pb-4">
+            <DialogTitle className="text-base sm:text-lg">Game Replay</DialogTitle>
+            <DialogDescription className="hidden sm:block text-sm">
               Watch the game unfold move by move
             </DialogDescription>
           </DialogHeader>
-          <div className="flex-1 min-h-0 overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             {selectedGame && (
               <GameViewer
                 result={selectedGame}
