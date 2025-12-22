@@ -79,6 +79,64 @@ function PlayContent() {
   // Key to force remount of game hook when starting fresh or resuming
   const [gameKey, setGameKey] = useState(0);
 
+  // Get followers from previous room
+  const getPreviousRoomFollowers = useCallback(async (): Promise<string[]> => {
+    if (!publicRoomIdRef.current) return [];
+    try {
+      const response = await fetch(`/api/rooms/${publicRoomIdRef.current}/state`);
+      const data = await response.json();
+      if (data.success && data.followedBy) {
+        return data.followedBy;
+      }
+    } catch (err) {
+      console.error("Error getting previous room followers:", err);
+    }
+    return [];
+  }, []);
+
+  // Create or update public room
+  const updatePublicRoom = useCallback(async (state: GameState) => {
+    if (!isPublicMatch) return;
+
+    try {
+      if (publicRoomIdRef.current) {
+        // Update existing room
+        await fetch("/api/rooms/update-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomId: publicRoomIdRef.current,
+            state,
+          }),
+        });
+      } else {
+        // Get followers from previous room if it exists
+        const followedBy = await getPreviousRoomFollowers();
+        
+        // Create new room
+        const response = await fetch("/api/rooms/create-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            playerName: "You",
+            difficulty: gameDifficulty,
+            initialState: state,
+            followedBy, // Migrate followers
+          }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          publicRoomIdRef.current = data.roomId;
+          
+          // Notify followers (in a real implementation, you'd use websockets or server-sent events)
+          // For now, followers will need to poll or check the watch page
+        }
+      }
+    } catch (err) {
+      console.error("Error updating public room:", err);
+    }
+  }, [isPublicMatch, gameDifficulty, getPreviousRoomFollowers]);
+
   const startNewSession = useCallback(async () => {
     const newState = createInitialState();
     const sessionId = gameHistory.startSession({
@@ -139,64 +197,6 @@ function PlayContent() {
     setPendingSavedSession(null);
     startNewSession();
   }, [gameHistory, startNewSession]);
-
-  // Get followers from previous room
-  const getPreviousRoomFollowers = useCallback(async (): Promise<string[]> => {
-    if (!publicRoomIdRef.current) return [];
-    try {
-      const response = await fetch(`/api/rooms/${publicRoomIdRef.current}/state`);
-      const data = await response.json();
-      if (data.success && data.followedBy) {
-        return data.followedBy;
-      }
-    } catch (err) {
-      console.error("Error getting previous room followers:", err);
-    }
-    return [];
-  }, []);
-
-  // Create or update public room
-  const updatePublicRoom = useCallback(async (state: GameState) => {
-    if (!isPublicMatch) return;
-
-    try {
-      if (publicRoomIdRef.current) {
-        // Update existing room
-        await fetch("/api/rooms/update-ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            roomId: publicRoomIdRef.current,
-            state,
-          }),
-        });
-      } else {
-        // Get followers from previous room if it exists
-        const followedBy = await getPreviousRoomFollowers();
-        
-        // Create new room
-        const response = await fetch("/api/rooms/create-ai", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            playerName: "You",
-            difficulty: gameDifficulty,
-            initialState: state,
-            followedBy, // Migrate followers
-          }),
-        });
-        const data = await response.json();
-        if (data.success) {
-          publicRoomIdRef.current = data.roomId;
-          
-          // Notify followers (in a real implementation, you'd use websockets or server-sent events)
-          // For now, followers will need to poll or check the watch page
-        }
-      }
-    } catch (err) {
-      console.error("Error updating public room:", err);
-    }
-  }, [isPublicMatch, gameDifficulty, getPreviousRoomFollowers]);
 
   const handleStateChange = useCallback(
     (state: GameState) => {
