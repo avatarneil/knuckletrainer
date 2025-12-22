@@ -50,7 +50,8 @@ function PlayContent() {
   const [showGameOver, setShowGameOver] = useState(false);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
-  const [pendingSavedSession, setPendingSavedSession] = useState<ReturnType<typeof gameStorage.loadSession>>(null);
+  const [pendingSavedSession, setPendingSavedSession] =
+    useState<ReturnType<typeof gameStorage.loadSession>>(null);
   const [lastWinner, setLastWinner] = useState<
     "player1" | "player2" | "draw" | null
   >(null);
@@ -73,7 +74,7 @@ function PlayContent() {
   const [gameTrainingMode, setGameTrainingMode] = useState(initialTraining);
   const [isReady, setIsReady] = useState(false);
   // Key to force remount of game hook when starting fresh or resuming
-  const [gameKey, setGameKey] = useState(0);
+  const [_gameKey, setGameKey] = useState(0);
 
   const startNewSession = useCallback(() => {
     const newState = createInitialState();
@@ -273,7 +274,11 @@ function PlayContent() {
       {/* Header */}
       <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="px-[clamp(0.5rem,1.5vw,0.75rem)]">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="px-[clamp(0.5rem,1.5vw,0.75rem)]"
+          >
             <ArrowLeft className="h-4 w-4" />
             <span className="hidden xs:inline ml-2">Back</span>
           </Button>
@@ -416,7 +421,8 @@ function PlayContent() {
                     Clear Game History ({gameHistory.history.length} games)
                   </Button>
                   <p className="text-xs text-muted-foreground">
-                    This will permanently delete all game history and reset statistics.
+                    This will permanently delete all game history and reset
+                    statistics.
                   </p>
                 </div>
               </div>
@@ -459,7 +465,10 @@ function PlayContent() {
       </Dialog>
 
       {/* Clear History Confirmation Dialog */}
-      <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+      <Dialog
+        open={showClearHistoryDialog}
+        onOpenChange={setShowClearHistoryDialog}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -467,7 +476,9 @@ function PlayContent() {
               Clear Game History?
             </DialogTitle>
             <DialogDescription>
-              This will permanently delete all {gameHistory.history.length} game{gameHistory.history.length !== 1 ? "s" : ""} from your history and reset your statistics. This action cannot be undone.
+              This will permanently delete all {gameHistory.history.length} game
+              {gameHistory.history.length !== 1 ? "s" : ""} from your history
+              and reset your statistics. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:gap-2">

@@ -7,9 +7,9 @@ import {
   Play,
   Sparkles,
   Swords,
-  Trophy,
   Trash2,
   TrendingUp,
+  Trophy,
   Users,
   WifiOff,
   X,
@@ -126,7 +126,12 @@ export default function Home() {
                 <div>
                   <p className="font-medium">Game in Progress</p>
                   <p className="text-sm text-muted-foreground">
-                    vs {DIFFICULTY_CONFIGS[gameHistory.savedSession.difficulty].name} AI
+                    vs{" "}
+                    {
+                      DIFFICULTY_CONFIGS[gameHistory.savedSession.difficulty]
+                        .name
+                    }{" "}
+                    AI
                     {" · "}
                     Turn {gameHistory.savedSession.state.turnNumber}
                     {" · "}
@@ -244,7 +249,8 @@ export default function Home() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Compare different AI strategies by pitting them against each other. Great for understanding how different algorithms perform.
+              Compare different AI strategies by pitting them against each
+              other. Great for understanding how different algorithms perform.
             </p>
 
             <Link href="/ai-vs-ai" className="block">
@@ -316,7 +322,8 @@ export default function Home() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Compare AI strategies by running large-scale simulations. View real-time statistics and replay games highlight-style.
+              Compare AI strategies by running large-scale simulations. View
+              real-time statistics and replay games highlight-style.
             </p>
 
             <Link href="/simulation" className="block">
@@ -461,7 +468,10 @@ export default function Home() {
       </details>
 
       {/* Clear History Confirmation Dialog */}
-      <Dialog open={showClearHistoryDialog} onOpenChange={setShowClearHistoryDialog}>
+      <Dialog
+        open={showClearHistoryDialog}
+        onOpenChange={setShowClearHistoryDialog}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -469,7 +479,9 @@ export default function Home() {
               Clear Game History?
             </DialogTitle>
             <DialogDescription>
-              This will permanently delete all {gameHistory.history.length} game{gameHistory.history.length !== 1 ? "s" : ""} from your history and reset your statistics. This action cannot be undone.
+              This will permanently delete all {gameHistory.history.length} game
+              {gameHistory.history.length !== 1 ? "s" : ""} from your history
+              and reset your statistics. This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="flex gap-2 sm:gap-2">

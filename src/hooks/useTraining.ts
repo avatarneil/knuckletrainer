@@ -3,6 +3,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { deepAnalysis, quickAnalysis } from "@/engine";
 import type { GameState, MoveAnalysis } from "@/engine/types";
+import {
+  deepAnalysisAsync,
+  isWorkerAvailable,
+  quickAnalysisAsync,
+} from "@/lib/ai-worker-manager";
+import { getAIPerformanceConfig, getPlatformInfo } from "@/lib/platform";
 
 interface UseTrainingReturn {
   isEnabled: boolean;
@@ -20,14 +26,16 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
   const [analysis, setAnalysis] = useState<MoveAnalysis[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  const analysisWorkerRef = useRef<NodeJS.Timeout | null>(null);
+  const analysisTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const analysisAbortRef = useRef<boolean>(false);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (analysisWorkerRef.current) {
-        clearTimeout(analysisWorkerRef.current);
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
       }
+      analysisAbortRef.current = true;
     };
   }, []);
 
@@ -49,9 +57,10 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
       if (!isEnabled) return;
 
       // Cancel any pending analysis
-      if (analysisWorkerRef.current) {
-        clearTimeout(analysisWorkerRef.current);
+      if (analysisTimeoutRef.current) {
+        clearTimeout(analysisTimeoutRef.current);
       }
+      analysisAbortRef.current = false;
 
       if (state.phase !== "placing") {
         setAnalysis(null);
@@ -60,23 +69,67 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
 
       setIsAnalyzing(true);
 
-      // Run analysis in next tick to not block UI
-      analysisWorkerRef.current = setTimeout(() => {
-        const result = deep
-          ? deepAnalysis(state, 1500)
-          : quickAnalysis(state, 400);
+      // Get platform-specific simulation counts
+      const performanceConfig = getAIPerformanceConfig();
+      const platform = getPlatformInfo();
 
-        setAnalysis(result.moves);
-        setIsAnalyzing(false);
-      }, 0);
+      // Use lower simulation counts on iOS for better responsiveness
+      const quickSims = platform.isIOS
+        ? Math.min(performanceConfig.monteCarloSimulations, 300)
+        : 400;
+      const deepSims = platform.isIOS
+        ? Math.min(performanceConfig.monteCarloSimulations, 800)
+        : 1500;
+
+      // Try async worker-based analysis first for better UI responsiveness
+      const runAsyncAnalysis = async () => {
+        try {
+          if (isWorkerAvailable()) {
+            const result = deep
+              ? await deepAnalysisAsync(state, deepSims)
+              : await quickAnalysisAsync(state, quickSims);
+
+            if (!analysisAbortRef.current) {
+              setAnalysis(result.moves);
+              setIsAnalyzing(false);
+            }
+            return;
+          }
+        } catch (error) {
+          console.warn(
+            "Worker analysis failed, falling back to main thread:",
+            error,
+          );
+        }
+
+        // Fall back to synchronous analysis with setTimeout for UI breathing room
+        analysisTimeoutRef.current = setTimeout(() => {
+          if (analysisAbortRef.current) return;
+
+          const result = deep
+            ? deepAnalysis(state, deepSims)
+            : quickAnalysis(state, quickSims);
+
+          if (!analysisAbortRef.current) {
+            setAnalysis(result.moves);
+            setIsAnalyzing(false);
+          }
+        }, 0);
+      };
+
+      // Start async analysis - use requestAnimationFrame for better timing
+      requestAnimationFrame(() => {
+        runAsyncAnalysis();
+      });
     },
     [isEnabled],
   );
 
   const clearAnalysis = useCallback(() => {
     setAnalysis(null);
-    if (analysisWorkerRef.current) {
-      clearTimeout(analysisWorkerRef.current);
+    analysisAbortRef.current = true;
+    if (analysisTimeoutRef.current) {
+      clearTimeout(analysisTimeoutRef.current);
     }
   }, []);
 

@@ -12,7 +12,7 @@ interface ResultsGraphProps {
 export function ResultsGraph({
   stats,
   maxGames,
-  height = 200,
+  height: _height = 200,
 }: ResultsGraphProps) {
   const { completedGames, player1Wins, player2Wins, draws } = stats;
 
@@ -60,7 +60,9 @@ export function ResultsGraph({
         <div className="space-y-1.5">
           {/* Player 1 Wins */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-20">Player 1:</span>
+            <span className="text-xs text-muted-foreground w-20">
+              Player 1:
+            </span>
             <div className="flex-1 h-6 bg-muted rounded overflow-hidden relative">
               <div
                 className="h-full bg-green-500 transition-all duration-300 ease-out"
@@ -74,7 +76,9 @@ export function ResultsGraph({
 
           {/* Player 2 Wins */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground w-20">Player 2:</span>
+            <span className="text-xs text-muted-foreground w-20">
+              Player 2:
+            </span>
             <div className="flex-1 h-6 bg-muted rounded overflow-hidden relative">
               <div
                 className="h-full bg-red-500 transition-all duration-300 ease-out"

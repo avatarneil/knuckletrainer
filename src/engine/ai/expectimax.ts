@@ -6,6 +6,11 @@
  * Node types:
  * - MAX: Current player chooses the best move
  * - CHANCE: Average over all possible dice rolls (1-6, each 1/6 probability)
+ *
+ * Performance optimizations:
+ * - Platform-aware node limits (reduced for iOS/mobile)
+ * - Move ordering for better pruning
+ * - Early termination when max nodes reached
  */
 
 import { applyMove, rollSpecificDie } from "../moves";
@@ -28,8 +33,29 @@ export interface ExpectimaxResult {
 /** Cache for transposition table */
 const transpositionTable = new Map<string, { depth: number; value: number }>();
 
+/** Default maximum nodes to explore before timing out (prevents freezing) */
+const DEFAULT_MAX_NODES = 500000;
+
+/** Platform-specific max nodes (set at runtime) */
+let currentMaxNodes = DEFAULT_MAX_NODES;
+
+/**
+ * Set the maximum nodes to explore (for platform-specific limits)
+ * Call this on app initialization based on platform detection
+ */
+export function setMaxNodes(maxNodes: number): void {
+  currentMaxNodes = maxNodes;
+}
+
+/**
+ * Get the current max nodes limit
+ */
+export function getMaxNodes(): number {
+  return currentMaxNodes;
+}
+
 /** Maximum nodes to explore before timing out (prevents freezing) */
-const MAX_NODES = 500000; // Reasonable limit for expert mode depth 6
+const _MAX_NODES = DEFAULT_MAX_NODES; // Keep for backward compatibility
 
 /**
  * Clear the transposition table (call between games)
@@ -82,8 +108,8 @@ function maxNode(
 ): number {
   nodesExplored.count++;
 
-  // Safety check: prevent runaway searches
-  if (nodesExplored.count > MAX_NODES) {
+  // Safety check: prevent runaway searches (uses platform-aware limit)
+  if (nodesExplored.count > currentMaxNodes) {
     return evaluate(state, player, config);
   }
 
@@ -157,8 +183,8 @@ function minNode(
 ): number {
   nodesExplored.count++;
 
-  // Safety check: prevent runaway searches
-  if (nodesExplored.count > MAX_NODES) {
+  // Safety check: prevent runaway searches (uses platform-aware limit)
+  if (nodesExplored.count > currentMaxNodes) {
     return evaluate(state, player, config);
   }
 
@@ -228,8 +254,8 @@ function chanceNode(
 ): number {
   nodesExplored.count++;
 
-  // Safety check: prevent runaway searches
-  if (nodesExplored.count > MAX_NODES) {
+  // Safety check: prevent runaway searches (uses platform-aware limit)
+  if (nodesExplored.count > currentMaxNodes) {
     return evaluate(state, player, config);
   }
 

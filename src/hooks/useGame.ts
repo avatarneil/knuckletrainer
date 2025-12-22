@@ -52,7 +52,10 @@ export function useGame(options: UseGameOptions): UseGameReturn {
   // Reset state when initialState changes (for resume functionality)
   const prevInitialStateRef = useRef(options.initialState);
   useEffect(() => {
-    if (options.initialState && options.initialState !== prevInitialStateRef.current) {
+    if (
+      options.initialState &&
+      options.initialState !== prevInitialStateRef.current
+    ) {
       setState(options.initialState);
       prevInitialStateRef.current = options.initialState;
     }
@@ -89,29 +92,35 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     onStateChangeRef.current?.(state);
   }, [state]);
 
-  const runMoveAnalysis = useCallback((gameState: GameState) => {
-    // Only run analysis for human player in AI mode
-    if (
-      gameState.phase === "placing" &&
-      gameState.currentPlayer === "player1" &&
-      options.mode === "ai"
-    ) {
-      // Run analysis in a microtask to not block UI
-      setTimeout(() => {
-        const analysis = quickAnalysis(gameState, 300);
-        setMoveAnalysis(analysis.moves);
-      }, 0);
-    } else {
-      setMoveAnalysis(null);
-    }
-  }, [options.mode]);
+  const runMoveAnalysis = useCallback(
+    (gameState: GameState) => {
+      // Only run analysis for human player in AI mode
+      if (
+        gameState.phase === "placing" &&
+        gameState.currentPlayer === "player1" &&
+        options.mode === "ai"
+      ) {
+        // Run analysis in a microtask to not block UI
+        setTimeout(() => {
+          const analysis = quickAnalysis(gameState, 300);
+          setMoveAnalysis(analysis.moves);
+        }, 0);
+      } else {
+        setMoveAnalysis(null);
+      }
+    },
+    [options.mode],
+  );
 
   const handleAITurn = useCallback(
     (gameState: GameState) => {
       const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";
-      const isPlayer2AI = options.mode === "ai" && gameState.currentPlayer === "player2";
-      const isPlayer1AI = options.mode === "ai-vs-ai" && gameState.currentPlayer === "player1";
-      const isPlayer2AIVsAI = options.mode === "ai-vs-ai" && gameState.currentPlayer === "player2";
+      const isPlayer2AI =
+        options.mode === "ai" && gameState.currentPlayer === "player2";
+      const isPlayer1AI =
+        options.mode === "ai-vs-ai" && gameState.currentPlayer === "player1";
+      const isPlayer2AIVsAI =
+        options.mode === "ai-vs-ai" && gameState.currentPlayer === "player2";
 
       if (!isAIMode || gameState.phase === "ended") {
         return;
@@ -135,9 +144,10 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       }
 
       // Determine which difficulty to use
-      const currentDifficulty = 
-        (isPlayer1AI && (options.player1Difficulty ?? difficulty)) || 
-        ((isPlayer2AI || isPlayer2AIVsAI) && (options.player2Difficulty ?? difficulty)) ||
+      const currentDifficulty =
+        (isPlayer1AI && (options.player1Difficulty ?? difficulty)) ||
+        ((isPlayer2AI || isPlayer2AIVsAI) &&
+          (options.player2Difficulty ?? difficulty)) ||
         difficulty;
 
       // AI turn with delay for better UX
@@ -208,7 +218,14 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         }
       }, 500);
     },
-    [options.mode, options.player1Difficulty, options.player2Difficulty, difficulty, isTrainingMode, runMoveAnalysis],
+    [
+      options.mode,
+      options.player1Difficulty,
+      options.player2Difficulty,
+      difficulty,
+      isTrainingMode,
+      runMoveAnalysis,
+    ],
   );
 
   // Trigger AI moves when it's an AI player's turn
@@ -218,9 +235,12 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       return;
     }
 
-    const isPlayer2AI = options.mode === "ai" && state.currentPlayer === "player2";
-    const isPlayer1AI = options.mode === "ai-vs-ai" && state.currentPlayer === "player1";
-    const isPlayer2AIVsAI = options.mode === "ai-vs-ai" && state.currentPlayer === "player2";
+    const isPlayer2AI =
+      options.mode === "ai" && state.currentPlayer === "player2";
+    const isPlayer1AI =
+      options.mode === "ai-vs-ai" && state.currentPlayer === "player1";
+    const isPlayer2AIVsAI =
+      options.mode === "ai-vs-ai" && state.currentPlayer === "player2";
 
     if (isPlayer2AI || isPlayer1AI || isPlayer2AIVsAI) {
       // Only trigger if we're not already rolling (to avoid double triggers)
@@ -270,7 +290,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         handleAITurn(result.newState);
       }
     },
-    [state, options, handleAITurn],
+    [state, handleAITurn],
   );
 
   const resetGame = useCallback(() => {

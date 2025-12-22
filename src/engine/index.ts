@@ -24,9 +24,11 @@ export {
   createAIPlayer,
   DIFFICULTY_CONFIGS,
   getAIMove,
-  getGreedyMove,
   getAllDifficultyLevels,
   getDifficultyConfig,
+  getGreedyMove,
+  getMaxNodes,
+  setMaxNodes,
 } from "./ai";
 // Moves
 export {
@@ -51,6 +53,16 @@ export {
   isColumnFull,
   isGridFull,
 } from "./scorer";
+// Simulation
+export {
+  configureSimulationPerformance,
+  getSimulationPerformanceConfig,
+  runSimulation,
+  type SimulationConfig,
+  SimulationController,
+  type SimulationResult,
+  type SimulationStats,
+} from "./simulation";
 // State management
 export {
   cloneState,
@@ -71,17 +83,11 @@ export {
 // Training
 export {
   analyzeAllMoves,
+  configureSimulations,
   deepAnalysis,
+  getSimulationConfig,
   quickAnalysis,
   simulateMove,
 } from "./training";
-// Simulation
-export {
-  runSimulation,
-  SimulationController,
-  type SimulationConfig,
-  type SimulationResult,
-  type SimulationStats,
-} from "./simulation";
 // Types
 export * from "./types";

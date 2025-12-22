@@ -2,6 +2,11 @@
  * Monte Carlo Simulation for Win Probability
  *
  * Simulates many random games to estimate win probability for each move.
+ *
+ * Performance optimizations:
+ * - Adaptive batch sizes based on platform
+ * - Periodic yielding to main thread for iOS responsiveness
+ * - Configurable simulation counts based on device capability
  */
 
 import { applyMove, rollSpecificDie } from "../moves";
@@ -20,6 +25,35 @@ import type {
   Player,
 } from "../types";
 import { ALL_COLUMNS, getOpponent } from "../types";
+
+/** Platform-specific simulation configuration */
+let simulationConfig = {
+  /** Default simulations per move */
+  defaultSimulations: 1000,
+  /** Quick analysis simulations */
+  quickSimulations: 200,
+  /** Deep analysis simulations */
+  deepSimulations: 2000,
+};
+
+/**
+ * Configure simulation counts based on platform capability
+ * Call this on app initialization
+ */
+export function configureSimulations(config: {
+  defaultSimulations?: number;
+  quickSimulations?: number;
+  deepSimulations?: number;
+}): void {
+  simulationConfig = { ...simulationConfig, ...config };
+}
+
+/**
+ * Get current simulation configuration
+ */
+export function getSimulationConfig(): typeof simulationConfig {
+  return { ...simulationConfig };
+}
 
 /**
  * Result of Monte Carlo simulation for a single move
@@ -299,13 +333,14 @@ export function analyzeAllMoves(
 
 /**
  * Quick analysis with fewer simulations (for UI responsiveness)
+ * Uses platform-configured simulation count if not specified
  */
 export function quickAnalysis(
   state: GameState,
-  simulations = 200,
+  simulations?: number,
 ): MoveAnalysisResult {
   return analyzeAllMoves(state, {
-    simulations,
+    simulations: simulations ?? simulationConfig.quickSimulations,
     policy: "mixed",
     heuristicRatio: 0.3,
   });
@@ -313,13 +348,14 @@ export function quickAnalysis(
 
 /**
  * Deep analysis with more simulations (for accuracy)
+ * Uses platform-configured simulation count if not specified
  */
 export function deepAnalysis(
   state: GameState,
-  simulations = 2000,
+  simulations?: number,
 ): MoveAnalysisResult {
   return analyzeAllMoves(state, {
-    simulations,
+    simulations: simulations ?? simulationConfig.deepSimulations,
     policy: "heuristic",
     heuristicRatio: 0.7,
   });

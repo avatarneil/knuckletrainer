@@ -6,7 +6,9 @@
 
 export {
   analyzeAllMoves,
+  configureSimulations,
   deepAnalysis,
+  getSimulationConfig,
   type MonteCarloConfig,
   type MoveAnalysisResult,
   quickAnalysis,
