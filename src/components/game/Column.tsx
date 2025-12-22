@@ -42,7 +42,7 @@ export function Column({
       onClick={isClickable ? onClick : undefined}
       disabled={!isClickable}
       className={cn(
-        "flex flex-col gap-2 p-2 rounded-xl transition-all duration-200",
+        "flex flex-col gap-1 sm:gap-2 p-1 sm:p-2 rounded-lg sm:rounded-xl transition-all duration-200",
         isClickable && "cursor-pointer hover:bg-muted/50 hover:scale-105",
         isHighlighted && "ring-2 ring-accent animate-pulse-glow",
         !isClickable && "cursor-default",
@@ -51,7 +51,7 @@ export function Column({
       {/* Column score */}
       <div
         className={cn(
-          "text-center font-mono font-bold text-lg transition-all",
+          "text-center font-mono font-bold text-sm sm:text-lg transition-all",
           score.total > 0 ? "text-accent" : "text-muted-foreground",
         )}
       >
@@ -59,7 +59,7 @@ export function Column({
       </div>
 
       {/* Dice slots */}
-      <div className="flex flex-col gap-2">
+      <div className="flex flex-col gap-1 sm:gap-2">
         {displayColumn.map((die, displayIdx) => {
           const actualIndex = displayIndices[displayIdx];
           return (
@@ -78,7 +78,7 @@ export function Column({
       {showProbability && winProbability !== undefined && (
         <div
           className={cn(
-            "text-center text-xs font-medium rounded-full px-2 py-1 transition-all",
+            "text-center text-[10px] sm:text-xs font-medium rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 transition-all",
             winProbability > 0.5
               ? "bg-green-500/20 text-green-400"
               : winProbability > 0.3

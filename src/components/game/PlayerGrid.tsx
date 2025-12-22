@@ -53,24 +53,24 @@ export function PlayerGrid({
   return (
     <div
       className={cn(
-        "flex flex-col items-center gap-4 p-4 rounded-2xl transition-all duration-300",
+        "flex flex-col items-center gap-1 sm:gap-3 p-2 sm:p-4 rounded-xl sm:rounded-2xl transition-all duration-300",
         isCurrentPlayer && !isOpponent && "ring-2 ring-accent/50 bg-accent/5",
       )}
     >
       {/* Player info */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 sm:gap-3">
         <div
           className={cn(
-            "w-3 h-3 rounded-full transition-all",
+            "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all",
             isCurrentPlayer
               ? "bg-accent animate-pulse"
               : "bg-muted-foreground/30",
           )}
         />
-        <span className="font-semibold text-lg">{playerName}</span>
+        <span className="font-semibold text-sm sm:text-lg">{playerName}</span>
         <div
           className={cn(
-            "font-mono font-bold text-2xl tabular-nums transition-all",
+            "font-mono font-bold text-lg sm:text-2xl tabular-nums transition-all",
             isCurrentPlayer ? "text-accent" : "text-foreground",
           )}
         >
@@ -81,7 +81,7 @@ export function PlayerGrid({
       {/* Grid */}
       <div
         className={cn(
-          "flex gap-2 p-3 rounded-xl bg-card/50 backdrop-blur border border-border/50",
+          "flex gap-1 sm:gap-2 p-1.5 sm:p-3 rounded-lg sm:rounded-xl bg-card/50 backdrop-blur border border-border/50",
         )}
       >
         {ALL_COLUMNS.map((colIndex) => (
@@ -105,8 +105,8 @@ export function PlayerGrid({
         ))}
       </div>
 
-      {/* Column scores breakdown */}
-      <div className="flex gap-4 text-xs text-muted-foreground">
+      {/* Column scores breakdown - hidden on very small screens */}
+      <div className="hidden xs:flex sm:flex gap-3 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
         {score.columns.map((col) => (
           <div key={`col-score-${col.column}`} className="text-center">
             <span className="font-mono">{col.total}</span>

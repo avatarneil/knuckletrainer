@@ -68,21 +68,21 @@ function PlayContent() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col p-4 md:p-8">
+    <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       {/* Header */}
-      <header className="flex items-center justify-between mb-6">
+      <header className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
         <Link href="/">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+          <Button variant="ghost" size="sm" className="px-2 sm:px-3">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Back</span>
           </Button>
         </Link>
 
-        <div className="flex items-center gap-2">
-          {/* Training Mode Toggle */}
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-card/50 border border-border/50">
-            <GraduationCap className="w-4 h-4 text-accent" />
-            <Label htmlFor="training-toggle" className="text-sm cursor-pointer">
+        <div className="flex items-center gap-1 sm:gap-2">
+          {/* Training Mode Toggle - compact on mobile */}
+          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-card/50 border border-border/50">
+            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent" />
+            <Label htmlFor="training-toggle" className="text-xs sm:text-sm cursor-pointer hidden xs:inline sm:inline">
               Training
             </Label>
             <Switch
@@ -95,21 +95,22 @@ function PlayContent() {
           <Button
             variant="ghost"
             size="icon"
+            className="h-8 w-8 sm:h-9 sm:w-9"
             onClick={() => setShowSettings(true)}
           >
             <Settings className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" onClick={handleNewGame}>
-            <RotateCcw className="mr-2 h-4 w-4" />
-            New Game
+          <Button variant="outline" size="sm" className="px-2 sm:px-3" onClick={handleNewGame}>
+            <RotateCcw className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">New Game</span>
           </Button>
         </div>
       </header>
 
       {/* Difficulty indicator */}
-      <div className="text-center mb-4">
-        <span className="text-sm text-muted-foreground">
+      <div className="text-center mb-1 sm:mb-2 flex-shrink-0">
+        <span className="text-xs sm:text-sm text-muted-foreground">
           Playing against{" "}
           <span className="text-accent font-medium">
             {DIFFICULTY_CONFIGS[game.difficulty].name}
@@ -119,7 +120,7 @@ function PlayContent() {
       </div>
 
       {/* Game Board with Training Panel */}
-      <div className="flex-1 flex items-center justify-center gap-6">
+      <div className="flex-1 flex items-center justify-center gap-4 sm:gap-6 min-h-0">
         <GameBoard
           state={game.state}
           isRolling={game.isRolling}

@@ -143,16 +143,16 @@ export default function MultiplayerPage() {
   // Render based on lobby state
   if (lobbyState === "menu") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8">
-        <Link href="/" className="absolute top-4 left-4">
-          <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back
+      <main className="h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+        <Link href="/" className="absolute top-2 sm:top-4 left-2 sm:left-4">
+          <Button variant="ghost" size="sm" className="px-2 sm:px-3">
+            <ArrowLeft className="h-4 w-4" />
+            <span className="hidden sm:inline ml-2">Back</span>
           </Button>
         </Link>
 
         {/* Connection status */}
-        <div className="absolute top-4 right-4 flex items-center gap-2 text-sm">
+        <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
           {multiplayer.isConnected ? (
             <>
               <Wifi className="w-4 h-4 text-green-500" />
@@ -166,15 +166,15 @@ export default function MultiplayerPage() {
           )}
         </div>
 
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold mb-2">Multiplayer</h1>
-          <p className="text-muted-foreground">Play against a friend online</p>
+        <div className="text-center mb-4 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Multiplayer</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">Play against a friend online</p>
         </div>
 
-        <div className="w-full max-w-md space-y-6">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6">
           {/* Player name */}
-          <div className="space-y-2">
-            <Label htmlFor="player-name">Your Name</Label>
+          <div className="space-y-1 sm:space-y-2">
+            <Label htmlFor="player-name" className="text-sm">Your Name</Label>
             <Input
               id="player-name"
               value={playerName}
@@ -184,20 +184,21 @@ export default function MultiplayerPage() {
             />
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
             {/* Create room */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Create Room</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6">
+                <CardTitle className="text-base sm:text-lg">Create Room</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Start a new game and invite a friend
                 </CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pb-4 sm:pb-6">
                 <Button
                   onClick={handleCreateRoom}
                   disabled={!playerName.trim() || !multiplayer.isConnected}
                   className="w-full"
+                  size="default"
                 >
                   <Users className="mr-2 h-4 w-4" />
                   Create Room
@@ -207,19 +208,19 @@ export default function MultiplayerPage() {
 
             {/* Join room */}
             <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Join Room</CardTitle>
-                <CardDescription>
+              <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6">
+                <CardTitle className="text-base sm:text-lg">Join Room</CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
                   Enter a room code to join a game
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-2 sm:space-y-3 pb-4 sm:pb-6">
                 <Input
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="Enter room code"
                   maxLength={6}
-                  className="font-mono text-center text-lg tracking-widest"
+                  className="font-mono text-center text-base sm:text-lg tracking-widest"
                 />
                 <Button
                   onClick={handleJoinRoom}
@@ -230,6 +231,7 @@ export default function MultiplayerPage() {
                   }
                   className="w-full"
                   variant="secondary"
+                  size="default"
                 >
                   Join Room
                 </Button>
@@ -249,37 +251,38 @@ export default function MultiplayerPage() {
 
   if (lobbyState === "waiting" || lobbyState === "creating") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8">
+      <main className="h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle>Waiting for Opponent</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center py-4 sm:py-6">
+            <CardTitle className="text-lg sm:text-xl">Waiting for Opponent</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Share this code with a friend to start the game
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-6">
+          <CardContent className="space-y-4 sm:space-y-6 pb-4 sm:pb-6">
             {/* Room code */}
             <div className="flex items-center justify-center gap-2">
-              <div className="font-mono text-4xl font-bold tracking-[0.3em] text-accent">
+              <div className="font-mono text-2xl sm:text-4xl font-bold tracking-[0.2em] sm:tracking-[0.3em] text-accent">
                 {multiplayer.roomId}
               </div>
-              <Button variant="ghost" size="icon" onClick={handleCopyCode}>
+              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={handleCopyCode}>
                 {copied ? (
-                  <Check className="h-5 w-5 text-green-500" />
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 ) : (
-                  <Copy className="h-5 w-5" />
+                  <Copy className="h-4 w-4 sm:h-5 sm:w-5" />
                 )}
               </Button>
             </div>
 
-            <div className="flex items-center justify-center gap-2 text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin" />
+            <div className="flex items-center justify-center gap-2 text-xs sm:text-sm text-muted-foreground">
+              <Loader2 className="h-3 w-3 sm:h-4 sm:w-4 animate-spin" />
               <span>Waiting for player to join...</span>
             </div>
 
             <Button
               variant="outline"
               className="w-full"
+              size="default"
               onClick={handleLeaveRoom}
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -293,7 +296,7 @@ export default function MultiplayerPage() {
 
   if (lobbyState === "joining") {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8">
+      <main className="h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
         <div className="flex items-center gap-2">
           <Loader2 className="h-6 w-6 animate-spin" />
           <span>Joining room...</span>
@@ -305,24 +308,24 @@ export default function MultiplayerPage() {
   // Playing state
   if (!multiplayer.gameState) {
     return (
-      <main className="min-h-screen flex flex-col items-center justify-center p-8">
+      <main className="h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden">
         <Loader2 className="h-8 w-8 animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen flex flex-col p-4 md:p-8">
+    <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       {/* Header */}
-      <header className="flex items-center justify-between mb-6">
-        <Button variant="ghost" size="sm" onClick={handleLeaveRoom}>
-          <LogOut className="mr-2 h-4 w-4" />
-          Leave
+      <header className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
+        <Button variant="ghost" size="sm" className="px-2 sm:px-3" onClick={handleLeaveRoom}>
+          <LogOut className="h-4 w-4" />
+          <span className="hidden sm:inline ml-2">Leave</span>
         </Button>
 
-        <div className="flex items-center gap-4">
-          <div className="text-sm text-muted-foreground">
-            Room:{" "}
+        <div className="flex items-center gap-2 sm:gap-4">
+          <div className="text-xs sm:text-sm text-muted-foreground">
+            <span className="hidden sm:inline">Room: </span>
             <span className="font-mono text-accent">{multiplayer.roomId}</span>
           </div>
           {multiplayer.isConnected ? (
@@ -334,9 +337,9 @@ export default function MultiplayerPage() {
       </header>
 
       {/* Turn indicator */}
-      <div className="text-center mb-4">
+      <div className="text-center mb-1 sm:mb-2 flex-shrink-0">
         <span
-          className={`text-lg font-medium ${
+          className={`text-sm sm:text-lg font-medium ${
             multiplayer.isMyTurn ? "text-accent" : "text-muted-foreground"
           }`}
         >
@@ -345,7 +348,7 @@ export default function MultiplayerPage() {
       </div>
 
       {/* Game Board */}
-      <div className="flex-1 flex items-center justify-center">
+      <div className="flex-1 flex items-center justify-center min-h-0">
         <GameBoard
           state={multiplayer.gameState}
           isRolling={isRolling}

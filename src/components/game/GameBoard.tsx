@@ -56,7 +56,7 @@ export function GameBoard({
   const player2Score = calculateGridScore(state.grids.player2);
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-2xl mx-auto">
+    <div className="flex flex-col items-center gap-2 sm:gap-4 md:gap-6 w-full max-w-2xl mx-auto">
       {/* Opponent grid (player2 shown at top) */}
       <PlayerGrid
         grid={state.grids.player2}
@@ -72,7 +72,7 @@ export function GameBoard({
       />
 
       {/* Center section: Score + Dice */}
-      <div className="flex flex-col items-center gap-4">
+      <div className="flex flex-col items-center gap-2 sm:gap-4">
         <ScoreCard
           player1Score={player1Score}
           player2Score={player2Score}
@@ -99,15 +99,15 @@ export function GameBoard({
         )}
 
         {isEnded && (
-          <div className="text-center p-6">
-            <h2 className="text-2xl font-bold mb-2">
+          <div className="text-center p-3 sm:p-6">
+            <h2 className="text-lg sm:text-2xl font-bold mb-1 sm:mb-2">
               {state.winner === "draw"
                 ? "It's a Draw!"
                 : state.winner === "player1"
                   ? `${player1Name} Wins!`
                   : `${player2Name} Wins!`}
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-sm sm:text-base text-muted-foreground">
               Final Score: {player1Score.total} - {player2Score.total}
             </p>
           </div>
