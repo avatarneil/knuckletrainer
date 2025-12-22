@@ -1,0 +1,8 @@
+[workspace]
+members = ["wasm"]
+resolver = "2"
+
+[profile.release]
+opt-level = "z"  # Optimize for size (important for WASM)
+lto = true       # Link-time optimization
+codegen-units = 1
