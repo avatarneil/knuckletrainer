@@ -167,14 +167,20 @@ export default function MultiplayerPage() {
         </div>
 
         <div className="text-center mb-4 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">Multiplayer</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">Play against a friend online</p>
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1 sm:mb-2">
+            Multiplayer
+          </h1>
+          <p className="text-sm sm:text-base text-muted-foreground">
+            Play against a friend online
+          </p>
         </div>
 
         <div className="w-full max-w-md space-y-4 sm:space-y-6">
           {/* Player name */}
           <div className="space-y-1 sm:space-y-2">
-            <Label htmlFor="player-name" className="text-sm">Your Name</Label>
+            <Label htmlFor="player-name" className="text-sm">
+              Your Name
+            </Label>
             <Input
               id="player-name"
               value={playerName}
@@ -188,7 +194,9 @@ export default function MultiplayerPage() {
             {/* Create room */}
             <Card>
               <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6">
-                <CardTitle className="text-base sm:text-lg">Create Room</CardTitle>
+                <CardTitle className="text-base sm:text-lg">
+                  Create Room
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Start a new game and invite a friend
                 </CardDescription>
@@ -209,7 +217,9 @@ export default function MultiplayerPage() {
             {/* Join room */}
             <Card>
               <CardHeader className="pb-2 sm:pb-3 pt-4 sm:pt-6">
-                <CardTitle className="text-base sm:text-lg">Join Room</CardTitle>
+                <CardTitle className="text-base sm:text-lg">
+                  Join Room
+                </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
                   Enter a room code to join a game
                 </CardDescription>
@@ -254,7 +264,9 @@ export default function MultiplayerPage() {
       <main className="h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-hidden pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center py-4 sm:py-6">
-            <CardTitle className="text-lg sm:text-xl">Waiting for Opponent</CardTitle>
+            <CardTitle className="text-lg sm:text-xl">
+              Waiting for Opponent
+            </CardTitle>
             <CardDescription className="text-xs sm:text-sm">
               Share this code with a friend to start the game
             </CardDescription>
@@ -265,7 +277,12 @@ export default function MultiplayerPage() {
               <div className="font-mono text-2xl sm:text-4xl font-bold tracking-[0.2em] sm:tracking-[0.3em] text-accent">
                 {multiplayer.roomId}
               </div>
-              <Button variant="ghost" size="icon" className="h-8 w-8 sm:h-10 sm:w-10" onClick={handleCopyCode}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 sm:h-10 sm:w-10"
+                onClick={handleCopyCode}
+              >
                 {copied ? (
                   <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 ) : (
@@ -318,7 +335,12 @@ export default function MultiplayerPage() {
     <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       {/* Header */}
       <header className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
-        <Button variant="ghost" size="sm" className="px-2 sm:px-3" onClick={handleLeaveRoom}>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="px-2 sm:px-3"
+          onClick={handleLeaveRoom}
+        >
           <LogOut className="h-4 w-4" />
           <span className="hidden sm:inline ml-2">Leave</span>
         </Button>

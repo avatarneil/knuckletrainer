@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (column !== 0 && column !== 1 && column !== 2) {
       return NextResponse.json(
         { success: false, error: "Invalid column" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!playerToken) {
       return NextResponse.json(
         { success: false, error: "Player token required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Not in a room" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
     if (!room) {
       return NextResponse.json(
         { success: false, error: "Room not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     if (!role) {
       return NextResponse.json(
         { success: false, error: "Not a player in this room" },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
     if (room.state.currentPlayer !== role) {
       return NextResponse.json(
         { success: false, error: "Not your turn" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -78,7 +78,7 @@ export async function POST(request: Request) {
     if (room.state.phase !== "placing") {
       return NextResponse.json(
         { success: false, error: "Cannot place now" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -87,7 +87,7 @@ export async function POST(request: Request) {
     if (!legalMoves || !legalMoves.columns.includes(column)) {
       return NextResponse.json(
         { success: false, error: "Invalid column" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
     if (!result) {
       return NextResponse.json(
         { success: false, error: "Move failed" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -115,8 +115,7 @@ export async function POST(request: Request) {
     console.error("Error placing die:", error);
     return NextResponse.json(
       { success: false, error: "Failed to place die" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     if (!playerToken) {
       return NextResponse.json(
         { success: false, error: "Player token required" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -32,7 +32,7 @@ export async function POST(request: Request) {
     if (!session) {
       return NextResponse.json(
         { success: false, error: "Not in a room" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -65,8 +65,7 @@ export async function POST(request: Request) {
     console.error("Error leaving room:", error);
     return NextResponse.json(
       { success: false, error: "Failed to leave room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

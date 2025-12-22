@@ -89,10 +89,14 @@ export function DiceRoller({
           <p className="text-xs sm:text-sm text-muted-foreground">
             {playerName}&apos;s turn
           </p>
-          <p className="text-sm sm:text-lg font-semibold text-accent">Choose a column</p>
+          <p className="text-sm sm:text-lg font-semibold text-accent">
+            Choose a column
+          </p>
         </div>
       ) : (
-        <div className="text-xs sm:text-sm text-muted-foreground">Waiting...</div>
+        <div className="text-xs sm:text-sm text-muted-foreground">
+          Waiting...
+        </div>
       )}
     </div>
   );

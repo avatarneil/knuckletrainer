@@ -88,7 +88,7 @@ export async function deleteRoom(roomId: string): Promise<void> {
  * Get player session by token
  */
 export async function getPlayerSession(
-  token: string
+  token: string,
 ): Promise<PlayerSession | null> {
   return kv.get<PlayerSession>(`${PLAYER_PREFIX}${token}`);
 }
@@ -98,7 +98,7 @@ export async function getPlayerSession(
  */
 export async function setPlayerSession(
   token: string,
-  session: PlayerSession
+  session: PlayerSession,
 ): Promise<void> {
   await kv.set(`${PLAYER_PREFIX}${token}`, session, { ex: ROOM_TTL });
 }
@@ -139,4 +139,3 @@ export function getPublicRoomState(room: GameRoom) {
     lastActivity: room.lastActivity,
   };
 }
-

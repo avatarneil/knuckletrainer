@@ -82,7 +82,10 @@ function PlayContent() {
           {/* Training Mode Toggle - compact on mobile */}
           <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-card/50 border border-border/50">
             <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent" />
-            <Label htmlFor="training-toggle" className="text-xs sm:text-sm cursor-pointer hidden xs:inline sm:inline">
+            <Label
+              htmlFor="training-toggle"
+              className="text-xs sm:text-sm cursor-pointer hidden xs:inline sm:inline"
+            >
               Training
             </Label>
             <Switch
@@ -101,7 +104,12 @@ function PlayContent() {
             <Settings className="h-4 w-4" />
           </Button>
 
-          <Button variant="outline" size="sm" className="px-2 sm:px-3" onClick={handleNewGame}>
+          <Button
+            variant="outline"
+            size="sm"
+            className="px-2 sm:px-3"
+            onClick={handleNewGame}
+          >
             <RotateCcw className="h-4 w-4" />
             <span className="hidden sm:inline ml-2">New Game</span>
           </Button>

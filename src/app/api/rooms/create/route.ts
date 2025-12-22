@@ -7,11 +7,11 @@
 import { NextResponse } from "next/server";
 import { createInitialState } from "@/engine";
 import {
+  type GameRoom,
   generatePlayerToken,
   generateRoomCode,
   setPlayerSession,
   setRoom,
-  type GameRoom,
 } from "@/lib/kv";
 
 interface CreateRoomRequest {
@@ -55,8 +55,7 @@ export async function POST(request: Request) {
     console.error("Error creating room:", error);
     return NextResponse.json(
       { success: false, error: "Failed to create room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

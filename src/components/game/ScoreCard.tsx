@@ -33,7 +33,9 @@ export function ScoreCard({
           winner === "player1" && "text-accent",
         )}
       >
-        <span className="text-xs sm:text-sm text-muted-foreground">{player1Name}</span>
+        <span className="text-xs sm:text-sm text-muted-foreground">
+          {player1Name}
+        </span>
         <span className="font-mono font-bold text-xl sm:text-3xl tabular-nums">
           {player1Score.total}
         </span>
@@ -80,7 +82,9 @@ export function ScoreCard({
           winner === "player2" && "text-accent",
         )}
       >
-        <span className="text-xs sm:text-sm text-muted-foreground">{player2Name}</span>
+        <span className="text-xs sm:text-sm text-muted-foreground">
+          {player2Name}
+        </span>
         <span className="font-mono font-bold text-xl sm:text-3xl tabular-nums">
           {player2Score.total}
         </span>

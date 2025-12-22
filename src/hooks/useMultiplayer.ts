@@ -146,18 +146,24 @@ export function useMultiplayer(): UseMultiplayerReturn {
         setIsMyTurn(data.isMyTurn);
         setIsWaitingForOpponent(data.isWaitingForOpponent);
         setOpponentDisconnected(data.opponentDisconnected);
-        
+
         // Check if opponent requested rematch
         const opponent = data.role === "player1" ? "player2" : "player1";
         setRematchRequested(data.rematchRequested === opponent);
-        
+
         setError(null);
       }
     } catch (err) {
       console.error("Error polling room state:", err);
       // Don't set error on transient network issues
     }
-  }, [roomId, getPlayerToken, getStoredRoomId, setStoredRoomId, setPlayerToken]);
+  }, [
+    roomId,
+    getPlayerToken,
+    getStoredRoomId,
+    setStoredRoomId,
+    setPlayerToken,
+  ]);
 
   // Start polling
   const startPolling = useCallback(() => {
@@ -225,7 +231,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
         throw err;
       }
     },
-    [setPlayerToken, setStoredRoomId, startPolling]
+    [setPlayerToken, setStoredRoomId, startPolling],
   );
 
   // Join room
@@ -261,7 +267,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
         return false;
       }
     },
-    [setPlayerToken, setStoredRoomId, startPolling]
+    [setPlayerToken, setStoredRoomId, startPolling],
   );
 
   // Leave room
@@ -363,7 +369,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
         return false;
       }
     },
-    [getPlayerToken, pollRoomState]
+    [getPlayerToken, pollRoomState],
   );
 
   // Request rematch

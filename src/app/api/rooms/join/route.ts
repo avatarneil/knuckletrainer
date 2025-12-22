@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     if (!roomId) {
       return NextResponse.json(
         { success: false, error: "Room code required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -36,14 +36,14 @@ export async function POST(request: Request) {
     if (!room) {
       return NextResponse.json(
         { success: false, error: "Room not found" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
     if (room.player2) {
       return NextResponse.json(
         { success: false, error: "Room is full" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -69,8 +69,7 @@ export async function POST(request: Request) {
     console.error("Error joining room:", error);
     return NextResponse.json(
       { success: false, error: "Failed to join room" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
-

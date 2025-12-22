@@ -1,8 +1,16 @@
 "use client";
 
-import { Dices, GraduationCap, Sparkles, Swords, Users } from "lucide-react";
+import {
+  Dices,
+  GraduationCap,
+  Sparkles,
+  Swords,
+  Users,
+  WifiOff,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { InstallPrompt, OfflineIndicator } from "@/components/pwa";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,13 +30,17 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { DIFFICULTY_CONFIGS } from "@/engine";
 import type { DifficultyLevel } from "@/engine/types";
+import { useOnlineStatus } from "@/hooks/usePWA";
 
 export default function Home() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [trainingMode, setTrainingMode] = useState(false);
+  const isOnline = useOnlineStatus();
 
   return (
     <main className="min-h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <OfflineIndicator />
+      <InstallPrompt />
       {/* Title */}
       <div className="text-center mb-6 sm:mb-12 animate-fade-in-up">
         <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
@@ -118,27 +130,48 @@ export default function Home() {
         </Card>
 
         {/* Multiplayer */}
-        <Card className="relative overflow-hidden group hover:border-secondary/50 transition-all duration-300">
+        <Card
+          className={`relative overflow-hidden group transition-all duration-300 ${
+            isOnline
+              ? "hover:border-secondary/50"
+              : "opacity-60 cursor-not-allowed"
+          }`}
+        >
           <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="w-5 h-5 text-secondary" />
               Multiplayer
+              {!isOnline && (
+                <WifiOff className="w-4 h-4 text-muted-foreground" />
+              )}
             </CardTitle>
-            <CardDescription>Play against another human online</CardDescription>
+            <CardDescription>
+              {isOnline
+                ? "Play against another human online"
+                : "Requires internet connection"}
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Create a room and share the code with a friend, or join an
-              existing room.
+              {isOnline
+                ? "Create a room and share the code with a friend, or join an existing room."
+                : "Connect to the internet to play multiplayer."}
             </p>
 
-            <Link href="/multiplayer" className="block">
-              <Button variant="secondary" className="w-full" size="lg">
-                <Users className="mr-2 h-4 w-4" />
-                Enter Lobby
+            {isOnline ? (
+              <Link href="/multiplayer" className="block">
+                <Button variant="secondary" className="w-full" size="lg">
+                  <Users className="mr-2 h-4 w-4" />
+                  Enter Lobby
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="secondary" className="w-full" size="lg" disabled>
+                <WifiOff className="mr-2 h-4 w-4" />
+                Offline
               </Button>
-            </Link>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -150,7 +183,9 @@ export default function Home() {
             <CardHeader className="py-3 sm:py-6">
               <CardTitle className="text-base sm:text-lg flex items-center justify-between">
                 How to Play
-                <span className="text-muted-foreground text-sm group-open:rotate-180 transition-transform">▼</span>
+                <span className="text-muted-foreground text-sm group-open:rotate-180 transition-transform">
+                  ▼
+                </span>
               </CardTitle>
             </CardHeader>
           </Card>
