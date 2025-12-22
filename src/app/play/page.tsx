@@ -2,6 +2,8 @@
 
 import {
   ArrowLeft,
+  Eye,
+  EyeOff,
   GraduationCap,
   History,
   Play,
@@ -54,6 +56,8 @@ function PlayContent() {
   const [lastWinner, setLastWinner] = useState<
     "player1" | "player2" | "draw" | null
   >(null);
+  const [isPublicMatch, setIsPublicMatch] = useState(false);
+  const publicRoomIdRef = useRef<string | null>(null);
 
   // Game history hook for persistence
   const gameHistory = useGameHistory();
@@ -75,7 +79,7 @@ function PlayContent() {
   // Key to force remount of game hook when starting fresh or resuming
   const [gameKey, setGameKey] = useState(0);
 
-  const startNewSession = useCallback(() => {
+  const startNewSession = useCallback(async () => {
     const newState = createInitialState();
     const sessionId = gameHistory.startSession({
       mode: "ai",
@@ -85,10 +89,17 @@ function PlayContent() {
     });
     sessionIdRef.current = sessionId;
     latestStateRef.current = newState;
+    
+    // If public match is enabled, create a new room
+    if (isPublicMatch) {
+      publicRoomIdRef.current = null; // Reset to create new room
+      await updatePublicRoom(newState);
+    }
+    
     setGameInitialState(newState);
     setGameKey((k) => k + 1); // Force remount of game hook
     setIsReady(true);
-  }, [gameHistory, gameDifficulty, gameTrainingMode]);
+  }, [gameHistory, gameDifficulty, gameTrainingMode, isPublicMatch, updatePublicRoom]);
 
   // Check for saved game on mount - directly check storage to avoid race condition
   useEffect(() => {
@@ -129,6 +140,64 @@ function PlayContent() {
     startNewSession();
   }, [gameHistory, startNewSession]);
 
+  // Get followers from previous room
+  const getPreviousRoomFollowers = useCallback(async (): Promise<string[]> => {
+    if (!publicRoomIdRef.current) return [];
+    try {
+      const response = await fetch(`/api/rooms/${publicRoomIdRef.current}/state`);
+      const data = await response.json();
+      if (data.success && data.followedBy) {
+        return data.followedBy;
+      }
+    } catch (err) {
+      console.error("Error getting previous room followers:", err);
+    }
+    return [];
+  }, []);
+
+  // Create or update public room
+  const updatePublicRoom = useCallback(async (state: GameState) => {
+    if (!isPublicMatch) return;
+
+    try {
+      if (publicRoomIdRef.current) {
+        // Update existing room
+        await fetch("/api/rooms/update-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            roomId: publicRoomIdRef.current,
+            state,
+          }),
+        });
+      } else {
+        // Get followers from previous room if it exists
+        const followedBy = await getPreviousRoomFollowers();
+        
+        // Create new room
+        const response = await fetch("/api/rooms/create-ai", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            playerName: "You",
+            difficulty: gameDifficulty,
+            initialState: state,
+            followedBy, // Migrate followers
+          }),
+        });
+        const data = await response.json();
+        if (data.success) {
+          publicRoomIdRef.current = data.roomId;
+          
+          // Notify followers (in a real implementation, you'd use websockets or server-sent events)
+          // For now, followers will need to poll or check the watch page
+        }
+      }
+    } catch (err) {
+      console.error("Error updating public room:", err);
+    }
+  }, [isPublicMatch, gameDifficulty, getPreviousRoomFollowers]);
+
   const handleStateChange = useCallback(
     (state: GameState) => {
       // Track latest state for callbacks
@@ -137,8 +206,10 @@ function PlayContent() {
       if (sessionIdRef.current && state.phase !== "ended") {
         gameHistory.saveGame(sessionIdRef.current, state);
       }
+      // Update public room if enabled
+      updatePublicRoom(state);
     },
-    [gameHistory],
+    [gameHistory, updatePublicRoom],
   );
 
   const handleGameEnd = useCallback(
@@ -167,7 +238,7 @@ function PlayContent() {
     onStateChange: handleStateChange,
   });
 
-  const handleNewGame = useCallback(() => {
+  const handleNewGame = useCallback(async () => {
     // Clear old session if it exists and wasn't recorded
     if (sessionIdRef.current) {
       gameHistory.discardGame();
@@ -187,7 +258,13 @@ function PlayContent() {
       initialState: newState,
     });
     sessionIdRef.current = sessionId;
-  }, [game, gameHistory]);
+    
+    // If public match is enabled, create a new room (followers will auto-join)
+    if (isPublicMatch) {
+      publicRoomIdRef.current = null; // Reset to create new room
+      await updatePublicRoom(newState);
+    }
+  }, [game, gameHistory, isPublicMatch, updatePublicRoom]);
 
   // Format time for display
   const formatTimeSince = (timestamp: number): string => {
@@ -280,6 +357,35 @@ function PlayContent() {
         </Link>
 
         <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)]">
+          {/* Public Match Toggle - compact on mobile */}
+          <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] px-[clamp(0.5rem,1.5vw,0.75rem)] py-[clamp(0.25rem,0.75vw,0.375rem)] rounded-lg bg-card/50 border border-border/50">
+            {isPublicMatch ? (
+              <Eye className="w-[clamp(0.875rem,2.5vw,1rem)] h-[clamp(0.875rem,2.5vw,1rem)] text-accent" />
+            ) : (
+              <EyeOff className="w-[clamp(0.875rem,2.5vw,1rem)] h-[clamp(0.875rem,2.5vw,1rem)] text-muted-foreground" />
+            )}
+            <Label
+              htmlFor="public-match-toggle"
+              className="text-[clamp(0.75rem,2vw,0.875rem)] cursor-pointer hidden xs:inline"
+            >
+              Public
+            </Label>
+            <Switch
+              id="public-match-toggle"
+              checked={isPublicMatch}
+              onCheckedChange={async (checked) => {
+                setIsPublicMatch(checked);
+                if (checked && latestStateRef.current) {
+                  // Create room immediately when toggled on
+                  await updatePublicRoom(latestStateRef.current);
+                } else {
+                  // Clear room reference when toggled off
+                  publicRoomIdRef.current = null;
+                }
+              }}
+            />
+          </div>
+
           {/* Training Mode Toggle - compact on mobile */}
           <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] px-[clamp(0.5rem,1.5vw,0.75rem)] py-[clamp(0.25rem,0.75vw,0.375rem)] rounded-lg bg-card/50 border border-border/50">
             <GraduationCap className="w-[clamp(0.875rem,2.5vw,1rem)] h-[clamp(0.875rem,2.5vw,1rem)] text-accent" />
@@ -388,6 +494,27 @@ function PlayContent() {
               <p className="text-xs text-muted-foreground">
                 {DIFFICULTY_CONFIGS[game.difficulty].description}
               </p>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div className="flex flex-col">
+                <Label htmlFor="settings-public">Public Match</Label>
+                <span className="text-xs text-muted-foreground">
+                  Allow others to watch your matches
+                </span>
+              </div>
+              <Switch
+                id="settings-public"
+                checked={isPublicMatch}
+                onCheckedChange={async (checked) => {
+                  setIsPublicMatch(checked);
+                  if (checked && latestStateRef.current) {
+                    await updatePublicRoom(latestStateRef.current);
+                  } else {
+                    publicRoomIdRef.current = null;
+                  }
+                }}
+              />
             </div>
 
             <div className="flex items-center justify-between">

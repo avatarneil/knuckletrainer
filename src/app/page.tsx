@@ -2,6 +2,7 @@
 
 import {
   Dices,
+  Eye,
   GraduationCap,
   History,
   Play,
@@ -235,32 +236,6 @@ export default function Home() {
           </CardContent>
         </Card>
 
-        {/* AI vs AI */}
-        <Card className="relative overflow-hidden group hover:border-primary/50 transition-all duration-300">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-primary" />
-              AI vs AI
-            </CardTitle>
-            <CardDescription>
-              Watch two AI strategies compete against each other
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground">
-              Compare different AI strategies by pitting them against each other. Great for understanding how different algorithms perform.
-            </p>
-
-            <Link href="/ai-vs-ai" className="block">
-              <Button variant="accent" className="w-full" size="lg">
-                <Sparkles className="mr-2 h-4 w-4" />
-                Watch Match
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
-
         {/* Multiplayer */}
         <Card
           className={`relative overflow-hidden group transition-all duration-300 ${
@@ -307,6 +282,32 @@ export default function Home() {
           </CardContent>
         </Card>
 
+        {/* AI vs AI */}
+        <Card className="relative overflow-hidden group hover:border-primary/50 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-primary" />
+              AI vs AI
+            </CardTitle>
+            <CardDescription>
+              Watch two AI strategies compete against each other
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Compare different AI strategies by pitting them against each other. Great for understanding how different algorithms perform.
+            </p>
+
+            <Link href="/ai-vs-ai" className="block">
+              <Button variant="accent" className="w-full" size="lg">
+                <Sparkles className="mr-2 h-4 w-4" />
+                Watch Match
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* Mass Simulation */}
         <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -330,6 +331,50 @@ export default function Home() {
                 Run Simulation
               </Button>
             </Link>
+          </CardContent>
+        </Card>
+
+        {/* Watch Live Matches */}
+        <Card className={`relative overflow-hidden group transition-all duration-300 ${
+          isOnline
+            ? "hover:border-primary/50"
+            : "opacity-60 cursor-not-allowed"
+        }`}>
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-primary" />
+              Watch Live Matches
+              {!isOnline && (
+                <WifiOff className="w-4 h-4 text-muted-foreground" />
+              )}
+            </CardTitle>
+            <CardDescription>
+              {isOnline
+                ? "Spectate public multiplayer and AI matches"
+                : "Requires internet connection"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {isOnline
+                ? "Watch live games and follow players to automatically join their next match."
+                : "Connect to the internet to watch matches."}
+            </p>
+
+            {isOnline ? (
+              <Link href="/watch" className="block">
+                <Button variant="outline" className="w-full" size="lg">
+                  <Eye className="mr-2 h-4 w-4" />
+                  Browse Matches
+                </Button>
+              </Link>
+            ) : (
+              <Button variant="outline" className="w-full" size="lg" disabled>
+                <WifiOff className="mr-2 h-4 w-4" />
+                Offline
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>
