@@ -11,6 +11,11 @@ let wasmInitPromise: Promise<void> | null = null;
  * Initialize the WASM module (called automatically on first use)
  */
 async function initWasmInternal(): Promise<void> {
+  // Only initialize WASM on the client side (not during SSR)
+  if (typeof window === "undefined") {
+    return;
+  }
+  
   if (wasmInitialized) return;
   
   if (wasmInitPromise) {
@@ -47,6 +52,11 @@ export async function initWasm(): Promise<void> {
  * Ensure WASM is initialized (non-blocking, returns immediately if not ready)
  */
 function ensureWasmReady(): boolean {
+  // Only initialize WASM on the client side (not during SSR)
+  if (typeof window === "undefined") {
+    return false;
+  }
+  
   // If already initialized, return true
   if (wasmInitialized && aiEngine) return true;
   
