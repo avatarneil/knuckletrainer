@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run build:wasm && next build",
+    "build:wasm": "cd wasm && wasm-pack build --target web --out-dir pkg",
+    "build:wasm:release": "cd wasm && wasm-pack build --target web --out-dir pkg --release",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
@@ -35,7 +37,8 @@
     "babel-plugin-react-compiler": "1.0.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "wasm-pack": "^0.13.0"
   },
   "ignoreScripts": [
     "sharp",

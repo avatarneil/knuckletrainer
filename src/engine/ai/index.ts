@@ -2,6 +2,7 @@
  * Knucklebones AI Player
  *
  * Provides an AI opponent with configurable difficulty levels.
+ * Uses WASM for high-performance computation when available.
  */
 
 import type { ColumnIndex, DifficultyLevel, GameState } from "../types";
@@ -14,10 +15,21 @@ import { evaluate, evaluateMoveQuick, getGreedyMove } from "./evaluation";
 import { clearTranspositionTable, getBestMove } from "./expectimax";
 import { ALL_COLUMNS } from "../types";
 import { isColumnFull } from "../scorer";
+import {
+  initWasm,
+  getBestMoveWasm,
+  clearWasmCache,
+  isWasmInitialized,
+} from "./wasm-bindings";
 
 export { DIFFICULTY_CONFIGS, getDifficultyConfig, getAllDifficultyLevels };
 export { clearTranspositionTable };
 export { getGreedyMove };
+
+// Initialize WASM on module load (non-blocking, background)
+initWasm().catch(() => {
+  // Already handled in wasm-bindings
+});
 
 /**
  * AI Player class for convenient usage
@@ -56,6 +68,26 @@ export class AIPlayer {
   chooseMove(state: GameState): ColumnIndex | null {
     try {
       const config = getDifficultyConfig(this.difficulty);
+      
+      // Try WASM first if available (synchronous, non-blocking)
+      if (state.phase === "placing" && state.currentDie !== null) {
+        const wasmMove = getBestMoveWasm(
+          state.grids.player1,
+          state.grids.player2,
+          state.currentPlayer,
+          state.currentDie,
+          config.depth,
+          config.randomness,
+          config.offenseWeight,
+          config.defenseWeight,
+          config.advancedEval,
+        );
+        if (wasmMove !== null) {
+          return wasmMove as ColumnIndex;
+        }
+      }
+      
+      // Fallback to TypeScript implementation
       const move = getBestMove(state, config);
       
       // Fallback: if expectimax fails, use a simple heuristic
@@ -112,6 +144,9 @@ export class AIPlayer {
    */
   reset(): void {
     clearTranspositionTable();
+    if (isWasmInitialized()) {
+      clearWasmCache();
+    }
   }
 }
 
@@ -133,6 +168,26 @@ export function getAIMove(
 ): ColumnIndex | null {
   try {
     const config = getDifficultyConfig(difficulty);
+    
+    // Try WASM first if available (synchronous, non-blocking)
+    if (state.phase === "placing" && state.currentDie !== null) {
+      const wasmMove = getBestMoveWasm(
+        state.grids.player1,
+        state.grids.player2,
+        state.currentPlayer,
+        state.currentDie,
+        config.depth,
+        config.randomness,
+        config.offenseWeight,
+        config.defenseWeight,
+        config.advancedEval,
+      );
+      if (wasmMove !== null) {
+        return wasmMove as ColumnIndex;
+      }
+    }
+    
+    // Fallback to TypeScript implementation
     const move = getBestMove(state, config);
     
     // Fallback: if expectimax fails, use a simple heuristic
