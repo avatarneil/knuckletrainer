@@ -26,10 +26,13 @@ export { DIFFICULTY_CONFIGS, getDifficultyConfig, getAllDifficultyLevels };
 export { clearTranspositionTable };
 export { getGreedyMove };
 
-// Initialize WASM on module load (non-blocking, background)
-initWasm().catch(() => {
-  // Already handled in wasm-bindings
-});
+// Initialize WASM on module load (non-blocking, background, client-side only)
+// Only initialize on client side to avoid SSR issues
+if (typeof window !== "undefined") {
+  initWasm().catch(() => {
+    // Already handled in wasm-bindings
+  });
+}
 
 /**
  * AI Player class for convenient usage

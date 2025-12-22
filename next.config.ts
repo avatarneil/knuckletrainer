@@ -5,17 +5,19 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
   // Explicitly use webpack for WASM support (Turbopack doesn't fully support WASM yet)
   webpack: (config, { isServer }) => {
-    // Enable WASM support
-    config.experiments = {
-      ...config.experiments,
-      asyncWebAssembly: true,
-    };
-    
-    // Handle WASM files
-    config.module.rules.push({
-      test: /\.wasm$/,
-      type: "asset/resource",
-    });
+    // Enable WASM support (client-side only)
+    if (!isServer) {
+      config.experiments = {
+        ...config.experiments,
+        asyncWebAssembly: true,
+      };
+      
+      // Handle WASM files (client-side only)
+      config.module.rules.push({
+        test: /\.wasm$/,
+        type: "asset/resource",
+      });
+    }
     
     return config;
   },
