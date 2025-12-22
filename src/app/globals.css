@@ -67,6 +67,9 @@
 }
 
 @theme inline {
+  /* Custom breakpoint for narrow viewports */
+  --breakpoint-xs: 480px;
+
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));

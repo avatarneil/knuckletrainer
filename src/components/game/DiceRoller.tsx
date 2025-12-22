@@ -66,8 +66,8 @@ export function DiceRoller({
             )}
           />
         ) : (
-          <div className="w-[clamp(3.5rem,12vmin,7rem)] h-[clamp(3.5rem,12vmin,7rem)] rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
-            <Dices className="w-[clamp(1.75rem,6vmin,3.5rem)] h-[clamp(1.75rem,6vmin,3.5rem)] text-muted-foreground/50" />
+          <div className="w-[clamp(3rem,10vmin,5.5rem)] h-[clamp(3rem,10vmin,5.5rem)] rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
+            <Dices className="w-[clamp(1.5rem,5vmin,2.75rem)] h-[clamp(1.5rem,5vmin,2.75rem)] text-muted-foreground/50" />
           </div>
         )}
       </div>
@@ -79,22 +79,22 @@ export function DiceRoller({
           disabled={isRolling}
           variant="accent"
           size="default"
-          className="font-bold text-sm sm:text-base"
+          className="font-bold text-[clamp(0.875rem,2.5vw,1rem)]"
         >
-          <Dices className="mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" />
+          <Dices className="mr-[clamp(0.375rem,1vw,0.5rem)] h-[clamp(1rem,3vw,1.25rem)] w-[clamp(1rem,3vw,1.25rem)]" />
           {isRolling ? "Rolling..." : "Roll Dice"}
         </Button>
       ) : currentDie ? (
         <div className="text-center">
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          <p className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
             {playerName}&apos;s turn
           </p>
-          <p className="text-sm sm:text-lg font-semibold text-accent">
+          <p className="text-[clamp(0.875rem,2.5vw,1.125rem)] font-semibold text-accent">
             Choose a column
           </p>
         </div>
       ) : (
-        <div className="text-xs sm:text-sm text-muted-foreground">
+        <div className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
           Waiting...
         </div>
       )}

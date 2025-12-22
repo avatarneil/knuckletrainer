@@ -51,7 +51,7 @@ export function Column({
       {/* Column score */}
       <div
         className={cn(
-          "text-center font-mono font-bold text-sm sm:text-lg transition-all",
+          "text-center font-mono font-bold text-[clamp(0.875rem,2.5vw,1.125rem)] transition-all",
           score.total > 0 ? "text-accent" : "text-muted-foreground",
         )}
       >
@@ -78,7 +78,7 @@ export function Column({
       {showProbability && winProbability !== undefined && (
         <div
           className={cn(
-            "text-center text-[10px] sm:text-xs font-medium rounded-full px-1.5 sm:px-2 py-0.5 sm:py-1 transition-all",
+            "text-center text-[clamp(0.625rem,1.5vw,0.75rem)] font-medium rounded-full px-[clamp(0.375rem,1vw,0.5rem)] py-[clamp(0.125rem,0.5vw,0.25rem)] transition-all",
             winProbability > 0.5
               ? "bg-green-500/20 text-green-400"
               : winProbability > 0.3

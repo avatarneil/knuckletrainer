@@ -58,19 +58,19 @@ export function PlayerGrid({
       )}
     >
       {/* Player info */}
-      <div className="flex items-center gap-2 sm:gap-3">
+      <div className="flex items-center gap-[clamp(0.5rem,1.5vw,0.75rem)]">
         <div
           className={cn(
-            "w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all",
+            "w-[clamp(0.5rem,1.5vw,0.75rem)] h-[clamp(0.5rem,1.5vw,0.75rem)] rounded-full transition-all",
             isCurrentPlayer
               ? "bg-accent animate-pulse"
               : "bg-muted-foreground/30",
           )}
         />
-        <span className="font-semibold text-sm sm:text-lg">{playerName}</span>
+        <span className="font-semibold text-[clamp(0.875rem,2.5vw,1.125rem)]">{playerName}</span>
         <div
           className={cn(
-            "font-mono font-bold text-lg sm:text-2xl tabular-nums transition-all",
+            "font-mono font-bold text-[clamp(1.125rem,3.5vw,1.5rem)] tabular-nums transition-all",
             isCurrentPlayer ? "text-accent" : "text-foreground",
           )}
         >
@@ -106,7 +106,7 @@ export function PlayerGrid({
       </div>
 
       {/* Column scores breakdown - hidden on very small screens */}
-      <div className="hidden xs:flex sm:flex gap-3 sm:gap-4 text-[10px] sm:text-xs text-muted-foreground">
+      <div className="hidden xs:flex gap-[clamp(0.75rem,2.5vw,1rem)] text-[clamp(0.625rem,1.5vw,0.75rem)] text-muted-foreground">
         {score.columns.map((col) => (
           <div key={`col-score-${col.column}`} className="text-center">
             <span className="font-mono">{col.total}</span>

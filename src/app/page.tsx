@@ -38,24 +38,24 @@ export default function Home() {
   const isOnline = useOnlineStatus();
 
   return (
-    <main className="min-h-[100dvh] flex flex-col items-center justify-center p-4 sm:p-8 overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <main className="min-h-[100dvh] flex flex-col items-center justify-center p-[clamp(1rem,3vw,2rem)] overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <OfflineIndicator />
       <InstallPrompt />
       {/* Title */}
-      <div className="text-center mb-6 sm:mb-12 animate-fade-in-up">
-        <div className="flex items-center justify-center gap-2 sm:gap-3 mb-2 sm:mb-4">
-          <Dices className="w-8 h-8 sm:w-12 sm:h-12 text-accent" />
-          <h1 className="text-3xl sm:text-5xl font-bold bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent">
+      <div className="text-center mb-[clamp(1.5rem,4vw,3rem)] animate-fade-in-up">
+        <div className="flex items-center justify-center gap-[clamp(0.5rem,1.5vw,0.75rem)] mb-[clamp(0.5rem,2vw,1rem)]">
+          <Dices className="w-[clamp(2rem,5vw,3rem)] h-[clamp(2rem,5vw,3rem)] text-accent" />
+          <h1 className="text-[clamp(1.75rem,5vw,3rem)] font-bold bg-gradient-to-r from-accent via-primary to-secondary bg-clip-text text-transparent">
             KnuckleTrainer
           </h1>
         </div>
-        <p className="text-base sm:text-xl text-muted-foreground">
+        <p className="text-[clamp(0.875rem,2.5vw,1.25rem)] text-muted-foreground">
           Master Knucklebones - the dice game from Cult of the Lamb
         </p>
       </div>
 
       {/* Game Mode Cards */}
-      <div className="grid md:grid-cols-2 gap-4 sm:gap-6 max-w-3xl w-full">
+      <div className="grid md:grid-cols-2 gap-[clamp(1rem,3vw,1.5rem)] max-w-[min(48rem,90vw)] w-full">
         {/* VS AI */}
         <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -177,11 +177,11 @@ export default function Home() {
       </div>
 
       {/* Rules Summary - collapsible on mobile */}
-      <details className="mt-4 sm:mt-8 max-w-3xl w-full group">
+      <details className="mt-[clamp(1rem,3vw,2rem)] max-w-[min(48rem,90vw)] w-full group">
         <summary className="cursor-pointer list-none">
           <Card className="transition-all group-open:rounded-b-none">
-            <CardHeader className="py-3 sm:py-6">
-              <CardTitle className="text-base sm:text-lg flex items-center justify-between">
+            <CardHeader className="py-[clamp(0.75rem,2vw,1.5rem)]">
+              <CardTitle className="text-[clamp(1rem,2.5vw,1.125rem)] flex items-center justify-between">
                 How to Play
                 <span className="text-muted-foreground text-sm group-open:rotate-180 transition-transform">
                   ▼
@@ -191,8 +191,8 @@ export default function Home() {
           </Card>
         </summary>
         <Card className="rounded-t-none border-t-0">
-          <CardContent className="pt-0 pb-4 sm:py-6">
-            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-muted-foreground">
+          <CardContent className="pt-0 pb-[clamp(1rem,2vw,1.5rem)]">
+            <ul className="space-y-[clamp(0.375rem,1vw,0.5rem)] text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="text-accent font-bold">1.</span>
                 Roll the die and place it in one of your 3 columns
@@ -215,7 +215,7 @@ export default function Home() {
       </details>
 
       {/* Footer */}
-      <footer className="mt-6 sm:mt-12 text-center text-xs sm:text-sm text-muted-foreground">
+      <footer className="mt-[clamp(1.5rem,4vw,3rem)] text-center text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
         <p>
           <span className="font-medium">KnuckleTrainer</span> - Master the game
           of Knucklebones

@@ -68,23 +68,23 @@ function PlayContent() {
   };
 
   return (
-    <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <main className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
       {/* Header */}
-      <header className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">
+      <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">
         <Link href="/">
-          <Button variant="ghost" size="sm" className="px-2 sm:px-3">
+          <Button variant="ghost" size="sm" className="px-[clamp(0.5rem,1.5vw,0.75rem)]">
             <ArrowLeft className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">Back</span>
+            <span className="hidden xs:inline ml-2">Back</span>
           </Button>
         </Link>
 
-        <div className="flex items-center gap-1 sm:gap-2">
+        <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)]">
           {/* Training Mode Toggle - compact on mobile */}
-          <div className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-card/50 border border-border/50">
-            <GraduationCap className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-accent" />
+          <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)] px-[clamp(0.5rem,1.5vw,0.75rem)] py-[clamp(0.25rem,0.75vw,0.375rem)] rounded-lg bg-card/50 border border-border/50">
+            <GraduationCap className="w-[clamp(0.875rem,2.5vw,1rem)] h-[clamp(0.875rem,2.5vw,1rem)] text-accent" />
             <Label
               htmlFor="training-toggle"
-              className="text-xs sm:text-sm cursor-pointer hidden xs:inline sm:inline"
+              className="text-[clamp(0.75rem,2vw,0.875rem)] cursor-pointer hidden xs:inline"
             >
               Training
             </Label>
@@ -98,7 +98,7 @@ function PlayContent() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-8 w-8 sm:h-9 sm:w-9"
+            className="h-[clamp(2rem,5vw,2.25rem)] w-[clamp(2rem,5vw,2.25rem)]"
             onClick={() => setShowSettings(true)}
           >
             <Settings className="h-4 w-4" />
@@ -107,18 +107,18 @@ function PlayContent() {
           <Button
             variant="outline"
             size="sm"
-            className="px-2 sm:px-3"
+            className="px-[clamp(0.5rem,1.5vw,0.75rem)]"
             onClick={handleNewGame}
           >
             <RotateCcw className="h-4 w-4" />
-            <span className="hidden sm:inline ml-2">New Game</span>
+            <span className="hidden xs:inline ml-2">New Game</span>
           </Button>
         </div>
       </header>
 
       {/* Difficulty indicator */}
-      <div className="text-center mb-1 sm:mb-2 flex-shrink-0">
-        <span className="text-xs sm:text-sm text-muted-foreground">
+      <div className="text-center mb-[clamp(0.25rem,1vw,0.5rem)] flex-shrink-0">
+        <span className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
           Playing against{" "}
           <span className="text-accent font-medium">
             {DIFFICULTY_CONFIGS[game.difficulty].name}
