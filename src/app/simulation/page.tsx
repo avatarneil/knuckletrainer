@@ -39,10 +39,12 @@ import {
   DIFFICULTY_CONFIGS,
   runSimulation,
   SimulationController,
+  createInitialState,
   type DifficultyLevel,
   type SimulationResult,
   type SimulationStats,
 } from "@/engine";
+import { simulateBatchStreamServer } from "@/lib/server-game";
 
 function SimulationContent() {
   const [player1Strategy, setPlayer1Strategy] = useState<DifficultyLevel>("greedy");
@@ -84,23 +86,102 @@ function SimulationContent() {
     controllerRef.current = controller;
 
     try {
-      const simulationResults = await runSimulation({
-        player1Strategy,
-        player2Strategy,
-        numGames,
-        controller,
-        onProgress: (newStats, latestResult) => {
-          if (controller.isCancelled()) return;
-          setStats(newStats);
-          if (latestResult) {
-            setResults((prev) => [...prev, latestResult]);
+      // Use server-side computation for better performance
+      const results: SimulationResult[] = [];
+      
+      try {
+        // Try server-side first
+        for await (const update of simulateBatchStreamServer(
+          player1Strategy,
+          player2Strategy,
+          numGames,
+        )) {
+          if (controller.isCancelled()) break;
+
+          if (update.type === "result") {
+            // Convert server result to SimulationResult format
+            const result: SimulationResult = {
+              id: update.data.id,
+              winner: update.data.winner,
+              finalScore: update.data.finalScore,
+              turnCount: update.data.turnCount,
+              moves: update.data.moves.map((m) => ({
+                turn: m.turn,
+                player: m.player,
+                dieValue: m.dieValue,
+                column: m.column,
+                state: m.state || createInitialState(), // Use state from server if available
+              })),
+              finalState: update.data.finalState || createInitialState(), // Use final state from server if available
+              player1Strategy,
+              player2Strategy,
+              completedAt: Date.now(),
+            };
+            results.push(result);
+            
+            // Update stats
+            const completedGames = results.length;
+            const player1Wins = results.filter((r) => r.winner === "player1").length;
+            const player2Wins = results.filter((r) => r.winner === "player2").length;
+            const draws = results.filter((r) => r.winner === "draw").length;
+            const player1WinRate = completedGames > 0 ? player1Wins / completedGames : 0;
+            const player2WinRate = completedGames > 0 ? player2Wins / completedGames : 0;
+            const averageTurnCount =
+              completedGames > 0
+                ? results.reduce((sum, r) => sum + r.turnCount, 0) / completedGames
+                : 0;
+            const averageScoreDiff =
+              completedGames > 0
+                ? results.reduce(
+                    (sum, r) =>
+                      sum + (r.finalScore.player1 - r.finalScore.player2),
+                    0,
+                  ) / completedGames
+                : 0;
+
+            const newStats: SimulationStats = {
+              totalGames: numGames,
+              completedGames,
+              player1Wins,
+              player2Wins,
+              draws,
+              player1WinRate,
+              player2WinRate,
+              averageTurnCount,
+              averageScoreDiff,
+            };
+
+            setStats(newStats);
+            setResults((prev) => [...prev, result]);
+          } else if (update.type === "progress") {
+            // Progress update - stats already updated above
+          } else if (update.type === "complete") {
+            // Simulation complete
+            break;
           }
-        },
-        onGameComplete: (result) => {
-          if (controller.isCancelled()) return;
-          // Results are already added in onProgress
-        },
-      });
+        }
+      } catch (serverError) {
+        console.warn("Server-side simulation failed, falling back to client-side:", serverError);
+        
+        // Fallback to client-side computation
+        const simulationResults = await runSimulation({
+          player1Strategy,
+          player2Strategy,
+          numGames,
+          controller,
+          onProgress: (newStats, latestResult) => {
+            if (controller.isCancelled()) return;
+            setStats(newStats);
+            if (latestResult) {
+              setResults((prev) => [...prev, latestResult]);
+            }
+          },
+          onGameComplete: (result) => {
+            if (controller.isCancelled()) return;
+            // Results are already added in onProgress
+          },
+        });
+      }
     } catch (error) {
       console.error("Simulation error:", error);
     } finally {

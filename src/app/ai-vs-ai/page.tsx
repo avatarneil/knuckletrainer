@@ -58,6 +58,7 @@ function AIVsAIContent() {
     player2Difficulty,
     initialState: gameInitialState,
     onGameEnd: handleGameEnd,
+    useServerComputation: true, // Use server-side computation for AI vs AI mode
   });
 
   const handleNewGame = useCallback(() => {

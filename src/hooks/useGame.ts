@@ -15,6 +15,7 @@ import type {
   GameState,
   MoveAnalysis,
 } from "@/engine/types";
+import { computeAIMoveServer } from "@/lib/server-game";
 
 interface UseGameOptions {
   mode: "ai" | "pvp" | "training" | "ai-vs-ai";
@@ -22,6 +23,8 @@ interface UseGameOptions {
   player1Difficulty?: DifficultyLevel; // For AI vs AI mode
   player2Difficulty?: DifficultyLevel; // For AI vs AI mode
   trainingMode?: boolean;
+  /** Use server-side computation for AI moves (default: false for backward compatibility) */
+  useServerComputation?: boolean;
   /** Initial state to resume from */
   initialState?: GameState;
   /** Callback when game ends */
@@ -107,7 +110,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
   }, [options.mode]);
 
   const handleAITurn = useCallback(
-    (gameState: GameState) => {
+    async (gameState: GameState) => {
       const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";
       const isPlayer2AI = options.mode === "ai" && gameState.currentPlayer === "player2";
       const isPlayer1AI = options.mode === "ai-vs-ai" && gameState.currentPlayer === "player1";
@@ -140,75 +143,214 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         ((isPlayer2AI || isPlayer2AIVsAI) && (options.player2Difficulty ?? difficulty)) ||
         difficulty;
 
+      // Use server-side computation if enabled
+      const useServer = options.useServerComputation ?? false;
+
       // AI turn with delay for better UX
-      aiTimeoutRef.current = setTimeout(() => {
+      aiTimeoutRef.current = setTimeout(async () => {
         let currentState = gameState;
 
-        // Roll if needed
-        if (currentState.phase === "rolling") {
-          setIsRolling(true);
-          currentState = rollDie(currentState);
-          setState(currentState);
-
-          // Place after short delay
-          setTimeout(() => {
-            setIsRolling(false);
-            const move = getAIMove(currentState, currentDifficulty);
-            if (move !== null) {
-              const result = applyMove(currentState, move);
-              if (result) {
-                setState(result.newState);
-                isProcessingAITurn.current = false;
-                setIsThinking(false);
-                if (isTrainingMode) {
-                  runMoveAnalysis(result.newState);
+        try {
+          // Roll if needed
+          if (currentState.phase === "rolling") {
+            setIsRolling(true);
+            
+            if (useServer) {
+              // Use server to roll and compute move
+              const serverResponse = await computeAIMoveServer(
+                currentState,
+                currentDifficulty,
+                true, // rollFirst
+              );
+              
+              if (serverResponse.success && serverResponse.state) {
+                currentState = serverResponse.state;
+                setState(currentState);
+                
+                // If we got a move, apply it
+                if (serverResponse.move !== null && serverResponse.move !== undefined) {
+                  setTimeout(() => {
+                    setIsRolling(false);
+                    const result = applyMove(currentState, serverResponse.move!);
+                    if (result) {
+                      setState(result.newState);
+                      isProcessingAITurn.current = false;
+                      setIsThinking(false);
+                      if (isTrainingMode) {
+                        runMoveAnalysis(result.newState);
+                      }
+                      // Check for game end or continue
+                      if (result.newState.phase !== "ended") {
+                        handleAITurn(result.newState);
+                      } else if (result.newState.winner) {
+                        onGameEndRef.current?.(result.newState.winner);
+                      }
+                    } else {
+                      isProcessingAITurn.current = false;
+                      setIsThinking(false);
+                    }
+                  }, 400);
+                } else {
+                  setIsRolling(false);
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
                 }
-                // Check for game end or continue
-                if (result.newState.phase !== "ended") {
-                  handleAITurn(result.newState);
-                } else if (result.newState.winner) {
-                  onGameEndRef.current?.(result.newState.winner);
+              } else {
+                // Fallback to client-side
+                currentState = rollDie(currentState);
+                setState(currentState);
+                setTimeout(() => {
+                  setIsRolling(false);
+                  const move = getAIMove(currentState, currentDifficulty);
+                  if (move !== null) {
+                    const result = applyMove(currentState, move);
+                    if (result) {
+                      setState(result.newState);
+                      isProcessingAITurn.current = false;
+                      setIsThinking(false);
+                      if (isTrainingMode) {
+                        runMoveAnalysis(result.newState);
+                      }
+                      if (result.newState.phase !== "ended") {
+                        handleAITurn(result.newState);
+                      } else if (result.newState.winner) {
+                        onGameEndRef.current?.(result.newState.winner);
+                      }
+                    } else {
+                      isProcessingAITurn.current = false;
+                      setIsThinking(false);
+                    }
+                  } else {
+                    isProcessingAITurn.current = false;
+                    setIsThinking(false);
+                  }
+                }, 400);
+              }
+            } else {
+              // Client-side computation
+              currentState = rollDie(currentState);
+              setState(currentState);
+
+              // Place after short delay
+              setTimeout(() => {
+                setIsRolling(false);
+                const move = getAIMove(currentState, currentDifficulty);
+                if (move !== null) {
+                  const result = applyMove(currentState, move);
+                  if (result) {
+                    setState(result.newState);
+                    isProcessingAITurn.current = false;
+                    setIsThinking(false);
+                    if (isTrainingMode) {
+                      runMoveAnalysis(result.newState);
+                    }
+                    // Check for game end or continue
+                    if (result.newState.phase !== "ended") {
+                      handleAITurn(result.newState);
+                    } else if (result.newState.winner) {
+                      onGameEndRef.current?.(result.newState.winner);
+                    }
+                  } else {
+                    isProcessingAITurn.current = false;
+                    setIsThinking(false);
+                  }
+                } else {
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
+                }
+              }, 400);
+            }
+          } else if (currentState.phase === "placing") {
+            if (useServer) {
+              // Use server to compute move
+              const serverResponse = await computeAIMoveServer(
+                currentState,
+                currentDifficulty,
+                false,
+              );
+              
+              if (serverResponse.success && serverResponse.move !== null && serverResponse.move !== undefined) {
+                const result = applyMove(currentState, serverResponse.move);
+                if (result) {
+                  setState(result.newState);
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
+                  if (isTrainingMode) {
+                    runMoveAnalysis(result.newState);
+                  }
+                  if (result.newState.phase !== "ended") {
+                    handleAITurn(result.newState);
+                  } else if (result.newState.winner) {
+                    onGameEndRef.current?.(result.newState.winner);
+                  }
+                } else {
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
+                }
+              } else {
+                // Fallback to client-side
+                const move = getAIMove(currentState, currentDifficulty);
+                if (move !== null) {
+                  const result = applyMove(currentState, move);
+                  if (result) {
+                    setState(result.newState);
+                    isProcessingAITurn.current = false;
+                    setIsThinking(false);
+                    if (isTrainingMode) {
+                      runMoveAnalysis(result.newState);
+                    }
+                    if (result.newState.phase !== "ended") {
+                      handleAITurn(result.newState);
+                    } else if (result.newState.winner) {
+                      onGameEndRef.current?.(result.newState.winner);
+                    }
+                  } else {
+                    isProcessingAITurn.current = false;
+                    setIsThinking(false);
+                  }
+                } else {
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
+                }
+              }
+            } else {
+              // Client-side computation
+              const move = getAIMove(currentState, currentDifficulty);
+              if (move !== null) {
+                const result = applyMove(currentState, move);
+                if (result) {
+                  setState(result.newState);
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
+                  if (isTrainingMode) {
+                    runMoveAnalysis(result.newState);
+                  }
+                  if (result.newState.phase !== "ended") {
+                    handleAITurn(result.newState);
+                  } else if (result.newState.winner) {
+                    onGameEndRef.current?.(result.newState.winner);
+                  }
+                } else {
+                  isProcessingAITurn.current = false;
+                  setIsThinking(false);
                 }
               } else {
                 isProcessingAITurn.current = false;
                 setIsThinking(false);
               }
-            } else {
-              isProcessingAITurn.current = false;
-              setIsThinking(false);
-            }
-          }, 400);
-        } else if (currentState.phase === "placing") {
-          const move = getAIMove(currentState, currentDifficulty);
-          if (move !== null) {
-            const result = applyMove(currentState, move);
-            if (result) {
-              setState(result.newState);
-              isProcessingAITurn.current = false;
-              setIsThinking(false);
-              if (isTrainingMode) {
-                runMoveAnalysis(result.newState);
-              }
-              if (result.newState.phase !== "ended") {
-                handleAITurn(result.newState);
-              } else if (result.newState.winner) {
-                onGameEndRef.current?.(result.newState.winner);
-              }
-            } else {
-              isProcessingAITurn.current = false;
-              setIsThinking(false);
             }
           } else {
             isProcessingAITurn.current = false;
             setIsThinking(false);
           }
-        } else {
+        } catch (error) {
+          console.error("Error in AI turn:", error);
           isProcessingAITurn.current = false;
           setIsThinking(false);
         }
       }, 500);
     },
-    [options.mode, options.player1Difficulty, options.player2Difficulty, difficulty, isTrainingMode, runMoveAnalysis],
+    [options.mode, options.player1Difficulty, options.player2Difficulty, options.useServerComputation, difficulty, isTrainingMode, runMoveAnalysis],
   );
 
   // Trigger AI moves when it's an AI player's turn
