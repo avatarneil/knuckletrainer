@@ -64,3 +64,12 @@ The AI engine uses Rust/WASM for maximum performance. The WASM module provides:
 - Optimized transposition tables with efficient hashing
 - Zero-copy data structures for minimal overhead
 - Automatic fallback to JavaScript if WASM fails to load
+
+## Deployment
+
+The project is configured for automatic WASM builds in CI/CD:
+
+- **GitHub Actions**: Automatically builds WASM on push/PR (see `.github/workflows/ci.yml`)
+- **Vercel**: Automatically builds WASM during deployment (see `vercel.json` and `vercel-build.sh`)
+
+For detailed deployment instructions, see [README-DEPLOYMENT.md](README-DEPLOYMENT.md).

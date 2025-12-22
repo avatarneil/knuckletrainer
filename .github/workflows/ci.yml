@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      
+      - name: Install wasm-pack
+        uses: jetli/wasm-pack-action@v0.4.0
+        with:
+          version: "latest"
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build WASM module
+        run: npm run build:wasm:release
+        continue-on-error: false
+      
+      - name: Build Next.js app
+        run: next build
+        env:
+          SKIP_ENV_VALIDATION: true
+      
+      - name: Check build artifacts
+        run: |
+          test -f wasm/pkg/knucklebones_ai_bg.wasm || exit 1
+          test -f wasm/pkg/knucklebones_ai.js || exit 1
+          echo "WASM build artifacts verified"
