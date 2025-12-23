@@ -164,7 +164,7 @@ export default function Home() {
       {/* Game Mode Cards */}
       <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-[clamp(1rem,3vw,1.5rem)] max-w-[min(96rem,90vw)] w-full">
         {/* VS AI */}
-        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
+        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300 flex flex-col h-full">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -175,7 +175,7 @@ export default function Home() {
               Challenge the computer at 5 difficulty levels
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             {/* Difficulty Select */}
             <div className="space-y-2">
               <Label>Difficulty</Label>
@@ -226,7 +226,7 @@ export default function Home() {
 
             <Link
               href={`/play?difficulty=${difficulty}&training=${trainingMode}`}
-              className="block"
+              className="block mt-auto"
             >
               <Button variant="default" className="w-full" size="lg">
                 <Sparkles className="mr-2 h-4 w-4" />
@@ -238,7 +238,7 @@ export default function Home() {
 
         {/* Multiplayer */}
         <Card
-          className={`relative overflow-hidden group transition-all duration-300 ${
+          className={`relative overflow-hidden group transition-all duration-300 flex flex-col h-full ${
             isOnline
               ? "hover:border-secondary/50"
               : "opacity-60 cursor-not-allowed"
@@ -259,7 +259,7 @@ export default function Home() {
                 : "Requires internet connection"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground">
               {isOnline
                 ? "Create a room and share the code with a friend, or join an existing room."
@@ -267,14 +267,14 @@ export default function Home() {
             </p>
 
             {isOnline ? (
-              <Link href="/multiplayer" className="block">
+              <Link href="/multiplayer" className="block mt-auto">
                 <Button variant="secondary" className="w-full" size="lg">
                   <Users className="mr-2 h-4 w-4" />
                   Enter Lobby
                 </Button>
               </Link>
             ) : (
-              <Button variant="secondary" className="w-full" size="lg" disabled>
+              <Button variant="secondary" className="w-full mt-auto" size="lg" disabled>
                 <WifiOff className="mr-2 h-4 w-4" />
                 Offline
               </Button>
@@ -283,7 +283,7 @@ export default function Home() {
         </Card>
 
         {/* AI vs AI */}
-        <Card className="relative overflow-hidden group hover:border-primary/50 transition-all duration-300">
+        <Card className="relative overflow-hidden group hover:border-primary/50 transition-all duration-300 flex flex-col h-full">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -294,12 +294,12 @@ export default function Home() {
               Watch two AI strategies compete against each other
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground">
               Compare different AI strategies by pitting them against each other. Great for understanding how different algorithms perform.
             </p>
 
-            <Link href="/ai-vs-ai" className="block">
+            <Link href="/ai-vs-ai" className="block mt-auto">
               <Button variant="accent" className="w-full" size="lg">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Watch Match
@@ -309,7 +309,7 @@ export default function Home() {
         </Card>
 
         {/* Mass Simulation */}
-        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
+        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300 flex flex-col h-full">
           <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -320,12 +320,12 @@ export default function Home() {
               Run hundreds of games and analyze results
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground">
               Compare AI strategies by running large-scale simulations. View real-time statistics and replay games highlight-style.
             </p>
 
-            <Link href="/simulation" className="block">
+            <Link href="/simulation" className="block mt-auto">
               <Button variant="outline" className="w-full" size="lg">
                 <TrendingUp className="mr-2 h-4 w-4" />
                 Run Simulation
@@ -335,7 +335,7 @@ export default function Home() {
         </Card>
 
         {/* Watch Live Matches */}
-        <Card className={`relative overflow-hidden group transition-all duration-300 ${
+        <Card className={`relative overflow-hidden group transition-all duration-300 flex flex-col h-full ${
           isOnline
             ? "hover:border-primary/50"
             : "opacity-60 cursor-not-allowed"
@@ -355,7 +355,7 @@ export default function Home() {
                 : "Requires internet connection"}
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 flex-1 flex flex-col">
             <p className="text-sm text-muted-foreground">
               {isOnline
                 ? "Watch live games and follow players to automatically join their next match."
@@ -363,14 +363,14 @@ export default function Home() {
             </p>
 
             {isOnline ? (
-              <Link href="/watch" className="block">
+              <Link href="/watch" className="block mt-auto">
                 <Button variant="outline" className="w-full" size="lg">
                   <Eye className="mr-2 h-4 w-4" />
                   Browse Matches
                 </Button>
               </Link>
             ) : (
-              <Button variant="outline" className="w-full" size="lg" disabled>
+              <Button variant="outline" className="w-full mt-auto" size="lg" disabled>
                 <WifiOff className="mr-2 h-4 w-4" />
                 Offline
               </Button>
