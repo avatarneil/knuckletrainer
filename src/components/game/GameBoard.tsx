@@ -59,24 +59,43 @@ export function GameBoard({
   const player2Score = calculateGridScore(state.grids.player2);
 
   return (
-    <div className="flex flex-col items-center justify-between flex-1 w-full max-w-[min(95vw,clamp(20rem,80vw,56rem))] mx-auto pt-[clamp(0.5rem,2vw,1rem)] pb-[clamp(0.25rem,1vw,0.5rem)]">
-      {/* Opponent grid (player2 shown at top) */}
-      <PlayerGrid
-        grid={state.grids.player2}
-        playerName={player2Name}
-        isCurrentPlayer={!isPlayer1Turn}
-        isOpponent={true}
-        canPlaceDie={canPlace && !isPlayer1Turn}
-        onColumnClick={onColumnClick}
-        legalColumns={!isPlayer1Turn ? legalColumns : []}
-        moveAnalysis={!isPlayer1Turn ? moveAnalysis : undefined}
-        showProbabilities={showProbabilities && !isPlayer1Turn}
-        highlightedColumn={!isPlayer1Turn ? highlightedColumn : null}
-        isThinking={isThinking && isPlayer2Turn && !isPlayer2Human}
-      />
+    <div className="flex flex-col lg:flex-row items-center justify-between flex-1 w-full max-w-[min(95vw,clamp(20rem,80vw,56rem))] lg:max-w-[min(95vw,90rem)] mx-auto pt-[clamp(0.5rem,2vw,1rem)] pb-[clamp(0.25rem,1vw,0.5rem)] gap-4 lg:gap-8">
+      {/* Mobile: Opponent at top / Desktop: Player on left */}
+      <div className="contents lg:hidden">
+        <PlayerGrid
+          grid={state.grids.player2}
+          playerName={player2Name}
+          isCurrentPlayer={!isPlayer1Turn}
+          isOpponent={true}
+          canPlaceDie={canPlace && !isPlayer1Turn}
+          onColumnClick={onColumnClick}
+          legalColumns={!isPlayer1Turn ? legalColumns : []}
+          moveAnalysis={!isPlayer1Turn ? moveAnalysis : undefined}
+          showProbabilities={showProbabilities && !isPlayer1Turn}
+          highlightedColumn={!isPlayer1Turn ? highlightedColumn : null}
+          isThinking={isThinking && isPlayer2Turn && !isPlayer2Human}
+        />
+      </div>
+
+      {/* Desktop only: Player grid on left */}
+      <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+        <PlayerGrid
+          grid={state.grids.player1}
+          playerName={player1Name}
+          isCurrentPlayer={isPlayer1Turn}
+          isOpponent={false}
+          canPlaceDie={canPlace && isPlayer1Turn}
+          onColumnClick={onColumnClick}
+          legalColumns={isPlayer1Turn ? legalColumns : []}
+          moveAnalysis={isPlayer1Turn ? moveAnalysis : undefined}
+          showProbabilities={showProbabilities && isPlayer1Turn}
+          highlightedColumn={isPlayer1Turn ? highlightedColumn : null}
+          isThinking={isThinking && isPlayer1Turn && !isPlayer1Human}
+        />
+      </div>
 
       {/* Center section: Score + Dice */}
-      <div className="flex flex-col items-center gap-[clamp(0.5rem,1.5vmin,1rem)]">
+      <div className="flex flex-col items-center gap-[clamp(0.5rem,1.5vmin,1rem)] lg:flex-shrink-0">
         <ScoreCard
           player1Score={player1Score}
           player2Score={player2Score}
@@ -119,20 +138,39 @@ export function GameBoard({
         )}
       </div>
 
-      {/* Player grid (player1 shown at bottom) */}
-      <PlayerGrid
-        grid={state.grids.player1}
-        playerName={player1Name}
-        isCurrentPlayer={isPlayer1Turn}
-        isOpponent={false}
-        canPlaceDie={canPlace && isPlayer1Turn}
-        onColumnClick={onColumnClick}
-        legalColumns={isPlayer1Turn ? legalColumns : []}
-        moveAnalysis={isPlayer1Turn ? moveAnalysis : undefined}
-        showProbabilities={showProbabilities && isPlayer1Turn}
-        highlightedColumn={isPlayer1Turn ? highlightedColumn : null}
-        isThinking={isThinking && isPlayer1Turn && !isPlayer1Human}
-      />
+      {/* Desktop only: Opponent grid on right */}
+      <div className="hidden lg:flex lg:flex-1 lg:justify-start">
+        <PlayerGrid
+          grid={state.grids.player2}
+          playerName={player2Name}
+          isCurrentPlayer={!isPlayer1Turn}
+          isOpponent={true}
+          canPlaceDie={canPlace && !isPlayer1Turn}
+          onColumnClick={onColumnClick}
+          legalColumns={!isPlayer1Turn ? legalColumns : []}
+          moveAnalysis={!isPlayer1Turn ? moveAnalysis : undefined}
+          showProbabilities={showProbabilities && !isPlayer1Turn}
+          highlightedColumn={!isPlayer1Turn ? highlightedColumn : null}
+          isThinking={isThinking && isPlayer2Turn && !isPlayer2Human}
+        />
+      </div>
+
+      {/* Mobile only: Player grid at bottom */}
+      <div className="contents lg:hidden">
+        <PlayerGrid
+          grid={state.grids.player1}
+          playerName={player1Name}
+          isCurrentPlayer={isPlayer1Turn}
+          isOpponent={false}
+          canPlaceDie={canPlace && isPlayer1Turn}
+          onColumnClick={onColumnClick}
+          legalColumns={isPlayer1Turn ? legalColumns : []}
+          moveAnalysis={isPlayer1Turn ? moveAnalysis : undefined}
+          showProbabilities={showProbabilities && isPlayer1Turn}
+          highlightedColumn={isPlayer1Turn ? highlightedColumn : null}
+          isThinking={isThinking && isPlayer1Turn && !isPlayer1Human}
+        />
+      </div>
     </div>
   );
 }
