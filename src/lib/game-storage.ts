@@ -210,3 +210,4 @@ export function generateSessionId(): string {
 export const gameStorage = new GameStorageServiceImpl(
   new LocalStorageAdapter(),
 );
+

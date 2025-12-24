@@ -195,3 +195,4 @@ export async function getPublicRooms(): Promise<GameRoom[]> {
   // Sort by last activity (most recent first)
   return rooms.sort((a, b) => b.lastActivity - a.lastActivity);
 }
+
