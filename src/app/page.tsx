@@ -1,6 +1,6 @@
 "use client";
 
-import { Dices, GraduationCap, Sparkles, Swords, Users } from "lucide-react";
+import { Bot, Dices, Eye, GraduationCap, Sparkles, Swords, TrendingUp, Users } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -137,6 +137,87 @@ export default function Home() {
               <Button variant="secondary" className="w-full" size="lg">
                 <Users className="mr-2 h-4 w-4" />
                 Enter Lobby
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* AI vs AI */}
+        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="w-5 h-5 text-accent" />
+              AI vs AI
+            </CardTitle>
+            <CardDescription>
+              Watch two AI strategies compete against each other
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Pit different AI difficulty levels against each other and observe
+              their strategies in real-time.
+            </p>
+
+            <Link href="/ai-vs-ai" className="block">
+              <Button variant="outline" className="w-full" size="lg">
+                <Bot className="mr-2 h-4 w-4" />
+                Watch AIs Battle
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Watch Live */}
+        <Card className="relative overflow-hidden group hover:border-secondary/50 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Eye className="w-5 h-5 text-secondary" />
+              Spectate
+            </CardTitle>
+            <CardDescription>
+              Watch live multiplayer and AI matches
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Join as a spectator to watch public games in progress and learn
+              from other players.
+            </p>
+
+            <Link href="/watch" className="block">
+              <Button variant="outline" className="w-full" size="lg">
+                <Eye className="mr-2 h-4 w-4" />
+                Watch Games
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Simulation */}
+        <Card className="relative overflow-hidden group hover:border-primary/50 transition-all duration-300 md:col-span-2">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="w-5 h-5 text-primary" />
+              Mass Simulation
+            </CardTitle>
+            <CardDescription>
+              Run hundreds of AI games to analyze strategy performance
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Compare different AI strategies by running mass simulations. View
+              win rates, score distributions, and replay individual games.
+            </p>
+
+            <Link href="/simulation" className="block">
+              <Button variant="outline" className="w-full" size="lg">
+                <TrendingUp className="mr-2 h-4 w-4" />
+                Run Simulations
               </Button>
             </Link>
           </CardContent>
