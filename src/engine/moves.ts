@@ -40,7 +40,9 @@ export function getLegalMoves(state: GameState): LegalMoves | null {
  */
 export function isLegalMove(state: GameState, column: ColumnIndex): boolean {
   const legalMoves = getLegalMoves(state);
-  if (!legalMoves) return false;
+  if (!legalMoves) {
+    return false;
+  }
   return legalMoves.columns.includes(column);
 }
 
@@ -63,7 +65,8 @@ function placeDieInColumn(column: Column, dieValue: DieValue): Column {
  * (removes nulls and shifts remaining dice to the bottom)
  */
 function compactColumn(column: Column): Column {
-  const nonNullDice = column.filter((d) => d !== null) as DieValue[];
+  // Filter out both null and undefined for safety
+  const nonNullDice = column.filter((d) => d != null) as DieValue[];
   const result: Column = [null, null, null];
 
   // Fill from bottom (index 0) up
@@ -93,10 +96,7 @@ function countRemovedDice(column: Column, dieValue: DieValue): number {
  * Apply a move to the game state
  * Returns a new immutable game state
  */
-export function applyMove(
-  state: GameState,
-  column: ColumnIndex,
-): MoveResult | null {
+export function applyMove(state: GameState, column: ColumnIndex): MoveResult | null {
   // Validate the move
   if (!isLegalMove(state, column) || state.currentDie === null) {
     return null;
@@ -113,17 +113,11 @@ export function applyMove(
   };
 
   // Place the die in the current player's column
-  newGrids[currentPlayer][column] = placeDieInColumn(
-    newGrids[currentPlayer][column],
-    dieValue,
-  );
+  newGrids[currentPlayer][column] = placeDieInColumn(newGrids[currentPlayer][column], dieValue);
 
   // Remove matching dice from opponent's corresponding column
   const removedCount = countRemovedDice(newGrids[opponent][column], dieValue);
-  newGrids[opponent][column] = removeMatchingDice(
-    newGrids[opponent][column],
-    dieValue,
-  );
+  newGrids[opponent][column] = removeMatchingDice(newGrids[opponent][column], dieValue);
 
   // Check for game end (current player's grid is full)
   const gameEnded = isGridFull(newGrids[currentPlayer]);
@@ -149,21 +143,18 @@ export function applyMove(
 
   // Create new state
   const newState: GameState = {
-    grids: newGrids,
-    currentPlayer: gameEnded ? currentPlayer : opponent,
     currentDie: null,
-    phase: gameEnded ? "ended" : "rolling",
-    winner,
-    turnNumber: state.turnNumber + 1,
+    currentPlayer: gameEnded ? currentPlayer : opponent,
+    grids: newGrids,
     moveHistory: [...state.moveHistory, move],
+    phase: gameEnded ? "ended" : "rolling",
+    turnNumber: state.turnNumber + 1,
+    winner,
   };
 
   return {
     newState,
-    removedDice:
-      removedCount > 0
-        ? { column, count: removedCount, value: dieValue }
-        : null,
+    removedDice: removedCount > 0 ? { column, count: removedCount, value: dieValue } : null,
   };
 }
 
@@ -203,8 +194,12 @@ export function rollSpecificDie(state: GameState, value: DieValue): GameState {
  * Check if the game has any legal moves available
  */
 export function hasLegalMoves(state: GameState): boolean {
-  if (state.phase === "ended") return false;
-  if (state.phase === "rolling") return true;
+  if (state.phase === "ended") {
+    return false;
+  }
+  if (state.phase === "rolling") {
+    return true;
+  }
 
   const legalMoves = getLegalMoves(state);
   return legalMoves !== null && legalMoves.columns.length > 0;
@@ -215,12 +210,14 @@ export function hasLegalMoves(state: GameState): boolean {
  * (used for AI lookahead with dice probability)
  */
 export function getAllPossibleMoves(
-  state: GameState,
-): Array<{ column: ColumnIndex; result: MoveResult }> {
+  state: GameState
+): { column: ColumnIndex; result: MoveResult }[] {
   const legalMoves = getLegalMoves(state);
-  if (!legalMoves) return [];
+  if (!legalMoves) {
+    return [];
+  }
 
-  const results: Array<{ column: ColumnIndex; result: MoveResult }> = [];
+  const results: { column: ColumnIndex; result: MoveResult }[] = [];
 
   for (const column of legalMoves.columns) {
     const result = applyMove(state, column);

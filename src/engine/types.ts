@@ -67,14 +67,17 @@ export interface GameState {
   moveHistory: Move[];
 }
 
+// prettier-ignore
+// biome-ignore format: semantic ordering by difficulty progression
+// oxfmt-ignore
 /** AI difficulty level */
 export type DifficultyLevel =
+  | "greedy"
   | "beginner"
   | "easy"
   | "medium"
   | "hard"
   | "expert"
-  | "greedy"
   | "master";
 
 /** Game mode */

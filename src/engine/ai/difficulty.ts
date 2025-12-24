@@ -25,6 +25,9 @@ export interface DifficultyConfig {
   advancedEval: boolean;
 }
 
+// prettier-ignore
+// biome-ignore format: semantic ordering by difficulty progression
+// oxfmt-ignore
 export const DIFFICULTY_CONFIGS: Record<DifficultyLevel, DifficultyConfig> = {
   greedy: {
     name: "Greedy",
