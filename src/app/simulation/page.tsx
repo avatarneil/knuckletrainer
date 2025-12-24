@@ -15,6 +15,7 @@ import { InstallPrompt } from "@/components/pwa";
 import { GameViewer } from "@/components/simulation/GameViewer";
 import { ResultsGraph } from "@/components/simulation/ResultsGraph";
 import { Button } from "@/components/ui/button";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import {
   Card,
   CardContent,
@@ -193,7 +194,7 @@ function SimulationContent() {
           <TrendingUp className="w-5 h-5 text-accent" />
           Mass Simulation
         </h1>
-        <div className="w-[clamp(4rem,10vw,6rem)]" /> {/* Spacer */}
+        <ThemeSwitcher />
       </header>
 
       <div className="flex-1 grid lg:grid-cols-3 gap-4 max-w-[min(96rem,95vw)] mx-auto w-full">

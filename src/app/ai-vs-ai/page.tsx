@@ -6,6 +6,7 @@ import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { GameBoard } from "@/components/game";
 import { InstallPrompt } from "@/components/pwa";
 import { Button } from "@/components/ui/button";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import {
   Dialog,
   DialogContent,
@@ -82,6 +83,8 @@ function AIVsAIContent() {
         </Link>
 
         <div className="flex items-center gap-[clamp(0.25rem,1vw,0.5rem)]">
+          <ThemeSwitcher />
+
           <Button
             variant="ghost"
             size="icon"

@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { GameBoard } from "@/components/game";
 import { InstallPrompt } from "@/components/pwa";
 import { Button } from "@/components/ui/button";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import type { GameState } from "@/engine/types";
 import { useOnlineStatus } from "@/hooks/usePWA";
 
@@ -180,6 +181,7 @@ export default function WatchRoomPage() {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">
+          <ThemeSwitcher />
           <Button
             variant={isFollowing ? "default" : "outline"}
             size="sm"

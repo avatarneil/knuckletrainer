@@ -3,6 +3,7 @@
 import { ArrowLeft, BookOpen } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import {
   Card,
   CardContent,
@@ -30,12 +31,15 @@ export default function DocsPage() {
               </p>
             </div>
           </div>
-          <Link href="/">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <ThemeSwitcher />
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Overview */}
