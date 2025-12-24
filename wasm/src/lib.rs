@@ -835,6 +835,8 @@ impl AIEngine {
                 let base_value = if new_state.phase == GamePhase::Ended {
                     evaluate(&new_state, player, &adaptive_config)
                 } else {
+                    // depth-1 is standard expectimax: we've consumed one level by making this move,
+                    // so we pass the remaining depth to the recursive chance node
                     chance_node(&new_state, adaptive_config.depth - 1, player, &adaptive_config, &opponent_config, &mut self.ctx)
                 };
                 

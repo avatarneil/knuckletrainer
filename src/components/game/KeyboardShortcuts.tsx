@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, ChevronUp, Keyboard } from "lucide-react";
+import { ChevronDown, Keyboard } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,11 +51,7 @@ export function KeyboardShortcuts() {
               onClick={() => setIsExpanded(false)}
               aria-label="Close shortcuts"
             >
-              {isExpanded ? (
-                <ChevronDown className="h-4 w-4" />
-              ) : (
-                <ChevronUp className="h-4 w-4" />
-              )}
+              <ChevronDown className="h-4 w-4" />
             </Button>
           </div>
 

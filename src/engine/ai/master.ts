@@ -10,8 +10,7 @@
  * This module provides a TypeScript interface to the WASM opponent profile.
  */
 
-import { calculateColumnScore } from "../scorer";
-import type { ColumnIndex, DieValue, GameState, Grid, Player } from "../types";
+import type { ColumnIndex, DieValue, GameState, Player } from "../types";
 import {
   endProfileGame,
   getMasterMoveWasm,
