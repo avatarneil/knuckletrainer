@@ -11,7 +11,7 @@ import type { Column, DieValue, GameConfig, GameState, Grid, Player } from "./ty
  * Create an empty column
  */
 export function createEmptyColumn(): Column {
-  return [undefined, undefined, undefined];
+  return [null, null, null];
 }
 
 /**
@@ -132,7 +132,7 @@ export function createStateFromGrids(
   player1Grid: Grid,
   player2Grid: Grid,
   currentPlayer: Player = "player1",
-  currentDie: DieValue | null = undefined
+  currentDie: DieValue | null = null
 ): GameState {
   return {
     currentDie,

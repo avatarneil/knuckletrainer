@@ -28,7 +28,7 @@ interface PublicRoom {
 export default function WatchPage() {
   const [rooms, setRooms] = useState<PublicRoom[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(undefined);
+  const [error, setError] = useState<string | null>(null);
   const isOnline = useOnlineStatus();
 
   const fetchRooms = useCallback(async () => {
@@ -39,7 +39,7 @@ export default function WatchPage() {
     }
 
     try {
-      setError(undefined);
+      setError(null);
       const response = await fetch("/api/rooms/public");
       const data = await response.json();
 

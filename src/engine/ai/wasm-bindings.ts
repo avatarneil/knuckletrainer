@@ -41,8 +41,8 @@ async function initWasmInternal(): Promise<void> {
       wasmInitialized = true;
     } catch (error) {
       console.warn("WASM AI engine failed to initialize, will use JS fallback:", error);
-      wasmModule = undefined;
-      aiEngine = undefined;
+      wasmModule = null;
+      aiEngine = null;
       wasmInitialized = false;
     }
   })();
@@ -120,7 +120,7 @@ export function getBestMoveWasm(
 ): number | null {
   // Check if WASM is ready (non-blocking)
   if (!ensureWasmReady() || !aiEngine) {
-    return; // Not ready yet, caller should use JS fallback
+    return null; // Not ready yet, caller should use JS fallback
   }
 
   try {
@@ -153,10 +153,10 @@ export function getBestMoveWasm(
       oppAdvancedEval
     );
 
-    return result === -1 ? undefined : result;
+    return result === -1 ? null : result;
   } catch (error) {
     console.warn("WASM move calculation failed:", error);
-    return; // Fallback to JS
+    return null; // Fallback to JS
   }
 }
 
@@ -190,7 +190,7 @@ export function isWasmInitialized(): boolean {
  */
 export function getOpponentProfile(owner: ProfileOwner): any {
   if (!ensureWasmReady() || !wasmModule) {
-    return;
+    return null;
   }
 
   if (owner === "player1") {
@@ -199,7 +199,7 @@ export function getOpponentProfile(owner: ProfileOwner): any {
         player1Profile = new wasmModule.OpponentProfile();
       } catch (error) {
         console.warn("Failed to create player1 opponent profile:", error);
-        return;
+        return null;
       }
     }
     return player1Profile;
@@ -211,7 +211,7 @@ export function getOpponentProfile(owner: ProfileOwner): any {
       player2Profile = new wasmModule.OpponentProfile();
     } catch (error) {
       console.warn("Failed to create player2 opponent profile:", error);
-      return;
+      return null;
     }
   }
   return player2Profile;
@@ -334,7 +334,7 @@ export function getProfileStats(owner: ProfileOwner): {
     };
   } catch (error) {
     console.warn(`Failed to get profile stats for ${owner}:`, error);
-    return;
+    return null;
   }
 }
 
@@ -349,13 +349,13 @@ export function getMasterMoveWasm(
   currentDie: 1 | 2 | 3 | 4 | 5 | 6
 ): number | null {
   if (!ensureWasmReady() || !aiEngine) {
-    return;
+    return null;
   }
 
   // Use the current player's profile (which tracks their opponent's behavior)
   const profile = getOpponentProfile(currentPlayer);
   if (!profile) {
-    return;
+    return null;
   }
 
   try {
@@ -365,9 +365,9 @@ export function getMasterMoveWasm(
 
     const result = aiEngine.get_master_move(grid1Arr, grid2Arr, playerNum, currentDie, profile);
 
-    return result === -1 ? undefined : result;
+    return result === -1 ? null : result;
   } catch (error) {
     console.warn("WASM master move calculation failed:", error);
-    return;
+    return null;
   }
 }

@@ -38,9 +38,9 @@ export async function POST(request: Request) {
 
       // Remove player from room
       if (role === "player1") {
-        room.player1 = undefined;
+        room.player1 = null;
       } else if (role === "player2") {
-        room.player2 = undefined;
+        room.player2 = null;
       }
 
       // Delete room if empty, otherwise save

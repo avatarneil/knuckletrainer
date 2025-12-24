@@ -370,7 +370,7 @@ export function expectimax(
   // Order moves
   const orderedColumns = orderMoves(state, legalColumns, player);
 
-  let bestMove: ColumnIndex | null;
+  let bestMove: ColumnIndex | null = null;
   let bestValue = Number.NEGATIVE_INFINITY;
 
   for (const column of orderedColumns) {
@@ -418,7 +418,7 @@ export function getBestMove(
   opponentConfig?: DifficultyConfig
 ): ColumnIndex | null {
   if (state.phase !== "placing" || state.currentDie === null) {
-    return;
+    return null;
   }
 
   const player = state.currentPlayer;

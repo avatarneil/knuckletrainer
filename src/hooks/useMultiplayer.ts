@@ -56,16 +56,16 @@ const ROOM_ID_KEY = "knucklebones_room_id";
 
 export function useMultiplayer(): UseMultiplayerReturn {
   const [isConnected, setIsConnected] = useState(true); // Always "connected" with polling
-  const [roomId, setRoomId] = useState<string | null>(undefined);
-  const [role, setRole] = useState<Player | null>(undefined);
-  const [gameState, setGameState] = useState<GameState | null>(undefined);
-  const [player1Name, setPlayer1Name] = useState<string | null>(undefined);
-  const [player2Name, setPlayer2Name] = useState<string | null>(undefined);
+  const [roomId, setRoomId] = useState<string | null>(null);
+  const [role, setRole] = useState<Player | null>(null);
+  const [gameState, setGameState] = useState<GameState | null>(null);
+  const [player1Name, setPlayer1Name] = useState<string | null>(null);
+  const [player2Name, setPlayer2Name] = useState<string | null>(null);
   const [isWaitingForOpponent, setIsWaitingForOpponent] = useState(false);
   const [isMyTurn, setIsMyTurn] = useState(false);
   const [opponentDisconnected, setOpponentDisconnected] = useState(false);
   const [rematchRequested, setRematchRequested] = useState(false);
-  const [error, setError] = useState<string | null>(undefined);
+  const [error, setError] = useState<string | null>(null);
 
   const playerTokenRef = useRef<string | null>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -129,10 +129,10 @@ export function useMultiplayer(): UseMultiplayerReturn {
       if (!response.ok) {
         if (response.status === 404) {
           // Room no longer exists
-          setRoomId(undefined);
-          setStoredRoomId(undefined);
-          setPlayerToken(undefined);
-          setGameState(undefined);
+          setRoomId(null);
+          setStoredRoomId(null);
+          setPlayerToken(null);
+          setGameState(null);
           setError("Room no longer exists");
           return;
         }
@@ -143,8 +143,8 @@ export function useMultiplayer(): UseMultiplayerReturn {
 
       if (data.success) {
         setGameState(data.state);
-        setPlayer1Name(data.player1?.name ?? undefined);
-        setPlayer2Name(data.player2?.name ?? undefined);
+        setPlayer1Name(data.player1?.name ?? null);
+        setPlayer2Name(data.player2?.name ?? null);
         setRoomId(data.roomId);
         setRole(data.role);
         setIsMyTurn(data.isMyTurn);
@@ -155,7 +155,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
         const opponent = data.role === "player1" ? "player2" : "player1";
         setRematchRequested(data.rematchRequested === opponent);
 
-        setError(undefined);
+        setError(null);
       }
     } catch (error) {
       console.error("Error polling room state:", error);
@@ -180,7 +180,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
   const stopPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
-      pollingRef.current = undefined;
+      pollingRef.current = null;
     }
   }, []);
 
@@ -255,7 +255,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
         setStoredRoomId(data.roomId);
         setRoomId(data.roomId);
         setRole(data.role);
-        setError(undefined);
+        setError(null);
 
         // Start polling
         startPolling();
@@ -286,13 +286,13 @@ export function useMultiplayer(): UseMultiplayerReturn {
     }
 
     stopPolling();
-    setPlayerToken(undefined);
-    setStoredRoomId(undefined);
-    setRoomId(undefined);
-    setRole(undefined);
-    setGameState(undefined);
-    setPlayer1Name(undefined);
-    setPlayer2Name(undefined);
+    setPlayerToken(null);
+    setStoredRoomId(null);
+    setRoomId(null);
+    setRole(null);
+    setGameState(null);
+    setPlayer1Name(null);
+    setPlayer2Name(null);
     setIsWaitingForOpponent(false);
     setIsMyTurn(false);
     setOpponentDisconnected(false);
@@ -305,7 +305,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
 
     if (!token) {
       setError("Not connected");
-      return;
+      return null;
     }
 
     try {
@@ -318,7 +318,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
 
       if (!data.success) {
         setError(data.error || "Failed to roll dice");
-        return;
+        return null;
       }
 
       // Poll immediately to get updated state
@@ -328,7 +328,7 @@ export function useMultiplayer(): UseMultiplayerReturn {
     } catch (error) {
       console.error("Error rolling dice:", error);
       setError("Failed to roll dice");
-      return;
+      return null;
     }
   }, [getPlayerToken, pollRoomState]);
 

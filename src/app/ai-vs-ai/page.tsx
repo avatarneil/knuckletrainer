@@ -32,7 +32,7 @@ function AIVsAIContent() {
   const [showGameOver, setShowGameOver] = useState(false);
   const [player1Difficulty, setPlayer1Difficulty] = useState<DifficultyLevel>("greedy");
   const [player2Difficulty, setPlayer2Difficulty] = useState<DifficultyLevel>("medium");
-  const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(undefined);
+  const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(null);
 
   const [gameInitialState, setGameInitialState] = useState<GameState | undefined>(() =>
     createInitialState()
@@ -55,7 +55,7 @@ function AIVsAIContent() {
     const newState = createInitialState();
     setGameInitialState(newState);
     setShowGameOver(false);
-    setLastWinner(undefined);
+    setLastWinner(null);
     game.resetGame();
   }, [game]);
 

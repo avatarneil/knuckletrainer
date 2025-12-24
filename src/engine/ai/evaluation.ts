@@ -229,7 +229,7 @@ export function evaluateMoveQuick(
  */
 export function getGreedyMove(state: GameState): ColumnIndex | null {
   if (state.phase !== "placing" || state.currentDie === null) {
-    return;
+    return null;
   }
 
   const grid = state.grids[state.currentPlayer];

@@ -56,9 +56,9 @@ function SimulationContent() {
     totalGames: 0,
   });
   const [results, setResults] = useState<SimulationResult[]>([]);
-  const [selectedGame, setSelectedGame] = useState<SimulationResult | null>(undefined);
+  const [selectedGame, setSelectedGame] = useState<SimulationResult | null>(null);
   const [showViewer, setShowViewer] = useState(false);
-  const [masterStats, setMasterStats] = useState<MasterProfileStats | null>(undefined);
+  const [masterStats, setMasterStats] = useState<MasterProfileStats | null>(null);
   const controllerRef = useRef<SimulationController | null>(null);
 
   // Check if Master AI is selected
@@ -67,7 +67,7 @@ function SimulationContent() {
   // Update Master AI stats periodically when Master is selected
   useEffect(() => {
     if (!hasMasterAI) {
-      setMasterStats(undefined);
+      setMasterStats(null);
       return;
     }
 
@@ -76,7 +76,7 @@ function SimulationContent() {
       setMasterStats(getMasterProfileStats());
     } catch (error) {
       console.error("Failed to load Master AI stats:", error);
-      setMasterStats(undefined);
+      setMasterStats(null);
     }
 
     // Update every second while simulation is running
@@ -138,14 +138,14 @@ function SimulationContent() {
       console.error("Simulation error:", error);
     } finally {
       setIsRunning(false);
-      controllerRef.current = undefined;
+      controllerRef.current = null;
     }
   }, [player1Strategy, player2Strategy, numGames]);
 
   const handleStop = useCallback(() => {
     if (controllerRef.current) {
       controllerRef.current.cancel();
-      controllerRef.current = undefined;
+      controllerRef.current = null;
     }
     setIsRunning(false);
   }, []);

@@ -122,7 +122,7 @@ export function getPlayerRole(room: GameRoom, token: string): Player | null {
   if (room.player2?.token === token) {
     return "player2";
   }
-  return;
+  return null;
 }
 
 /**

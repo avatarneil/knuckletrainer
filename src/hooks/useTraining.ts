@@ -17,7 +17,7 @@ interface UseTrainingReturn {
 
 export function useTraining(initialEnabled = false): UseTrainingReturn {
   const [isEnabled, setIsEnabled] = useState(initialEnabled);
-  const [analysis, setAnalysis] = useState<MoveAnalysis[] | null>(undefined);
+  const [analysis, setAnalysis] = useState<MoveAnalysis[] | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const analysisWorkerRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,7 +42,7 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
 
   const disable = useCallback(() => {
     setIsEnabled(false);
-    setAnalysis(undefined);
+    setAnalysis(null);
   }, []);
 
   const runAnalysis = useCallback(
@@ -57,7 +57,7 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
       }
 
       if (state.phase !== "placing") {
-        setAnalysis(undefined);
+        setAnalysis(null);
         return;
       }
 
@@ -75,7 +75,7 @@ export function useTraining(initialEnabled = false): UseTrainingReturn {
   );
 
   const clearAnalysis = useCallback(() => {
-    setAnalysis(undefined);
+    setAnalysis(null);
     if (analysisWorkerRef.current) {
       clearTimeout(analysisWorkerRef.current);
     }

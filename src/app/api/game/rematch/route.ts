@@ -47,7 +47,7 @@ export async function POST(request: Request) {
     if (room.rematchRequested === opponent) {
       // Both players want rematch - start new game
       room.state = createInitialState();
-      room.rematchRequested = undefined;
+      room.rematchRequested = null;
 
       await setRoom(room);
 

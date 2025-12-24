@@ -60,7 +60,7 @@ function isStandalone(): boolean {
 }
 
 export function useInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(undefined);
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [canInstall, setCanInstall] = useState(false);
   const [isInstalled, setIsInstalled] = useState(false);
   const [showPrompt, setShowPrompt] = useState(false);
@@ -125,7 +125,7 @@ export function useInstallPrompt() {
       setIsInstalled(true);
       setCanInstall(false);
       setShowPrompt(false);
-      setDeferredPrompt(undefined);
+      setDeferredPrompt(null);
       clearTimeout(showTimeout);
       clearTimeout(autoDismissTimeout);
     };
@@ -163,7 +163,7 @@ export function useInstallPrompt() {
       setIsInstalled(true);
     }
 
-    setDeferredPrompt(undefined);
+    setDeferredPrompt(null);
     setCanInstall(false);
     setShowPrompt(false);
 

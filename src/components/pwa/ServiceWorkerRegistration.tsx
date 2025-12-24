@@ -50,5 +50,5 @@ export function ServiceWorkerRegistration() {
       });
   }, []);
 
-  return;
+  return null;
 }

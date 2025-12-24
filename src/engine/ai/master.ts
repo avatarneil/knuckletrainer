@@ -120,7 +120,7 @@ export function endMasterGame(owner?: ProfileOwner): void {
  */
 export function getMasterMove(state: GameState): ColumnIndex | null {
   if (state.phase !== "placing" || state.currentDie === null) {
-    return;
+    return null;
   }
 
   const result = getMasterMoveWasm(

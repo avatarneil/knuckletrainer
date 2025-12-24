@@ -56,8 +56,8 @@ function PlayContent() {
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
   const [pendingSavedSession, setPendingSavedSession] =
-    useState<ReturnType<typeof gameStorage.loadSession>>(undefined);
-  const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(undefined);
+    useState<ReturnType<typeof gameStorage.loadSession>>(null);
+  const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(null);
   const [isPublicMatch, setIsPublicMatch] = useState(false);
   const publicRoomIdRef = useRef<string | null>(null);
 
@@ -156,7 +156,7 @@ function PlayContent() {
 
     // If public match is enabled, create a new room
     if (isPublicMatch) {
-      publicRoomIdRef.current = undefined; // Reset to create new room
+      publicRoomIdRef.current = null; // Reset to create new room
       await updatePublicRoom(newState);
     }
 
@@ -195,14 +195,14 @@ function PlayContent() {
       setGameKey((k) => k + 1); // Force remount of game hook
     }
     setShowResumeDialog(false);
-    setPendingSavedSession(undefined);
+    setPendingSavedSession(null);
     setIsReady(true);
   }, [pendingSavedSession]);
 
   const handleDiscardAndNew = useCallback(() => {
     gameHistory.discardGame();
     setShowResumeDialog(false);
-    setPendingSavedSession(undefined);
+    setPendingSavedSession(null);
     startNewSession();
   }, [gameHistory, startNewSession]);
 
@@ -272,7 +272,7 @@ function PlayContent() {
     // Reset game
     game.resetGame();
     setShowGameOver(false);
-    setLastWinner(undefined);
+    setLastWinner(null);
 
     // Start new session
     const newState = createInitialState();
@@ -286,7 +286,7 @@ function PlayContent() {
 
     // If public match is enabled, create a new room (followers will auto-join)
     if (isPublicMatch) {
-      publicRoomIdRef.current = undefined; // Reset to create new room
+      publicRoomIdRef.current = null; // Reset to create new room
       await updatePublicRoom(newState);
     }
   }, [game, gameHistory, isPublicMatch, updatePublicRoom]);
@@ -405,7 +405,7 @@ function PlayContent() {
                   await updatePublicRoom(latestStateRef.current);
                 } else {
                   // Clear room reference when toggled off
-                  publicRoomIdRef.current = undefined;
+                  publicRoomIdRef.current = null;
                 }
               }}
             />
@@ -539,7 +539,7 @@ function PlayContent() {
                   if (checked && latestStateRef.current) {
                     await updatePublicRoom(latestStateRef.current);
                   } else {
-                    publicRoomIdRef.current = undefined;
+                    publicRoomIdRef.current = null;
                   }
                 }}
               />

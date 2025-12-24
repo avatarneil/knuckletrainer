@@ -85,7 +85,7 @@ export function calculateMoveScoreGain(
 
   // Create a copy of the column with the new die
   const newColumn = [...grid[column]] as Column;
-  const emptyIndex = newColumn.indexOf(undefined);
+  const emptyIndex = newColumn.indexOf(null);
 
   if (emptyIndex === -1) {
     return 0; // Column is full

@@ -78,9 +78,9 @@ class LocalStorageAdapter implements StorageAdapter {
     }
     try {
       const item = localStorage.getItem(this.getFullKey(key));
-      return item ? (JSON.parse(item) as T) : undefined;
+      return item ? (JSON.parse(item) as T) : null;
     } catch {
-      return;
+      return null;
     }
   }
 

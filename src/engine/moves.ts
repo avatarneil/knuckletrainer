@@ -23,7 +23,7 @@ import { ALL_COLUMNS, getOpponent } from "./types";
  */
 export function getLegalMoves(state: GameState): LegalMoves | null {
   if (state.phase !== "placing" || state.currentDie === null) {
-    return;
+    return null;
   }
 
   const grid = state.grids[state.currentPlayer];
@@ -51,7 +51,7 @@ export function isLegalMove(state: GameState, column: ColumnIndex): boolean {
  */
 function placeDieInColumn(column: Column, dieValue: DieValue): Column {
   const newColumn = [...column] as Column;
-  const emptyIndex = newColumn.indexOf(undefined);
+  const emptyIndex = newColumn.indexOf(null);
 
   if (emptyIndex !== -1) {
     newColumn[emptyIndex] = dieValue;
@@ -66,7 +66,7 @@ function placeDieInColumn(column: Column, dieValue: DieValue): Column {
  */
 function compactColumn(column: Column): Column {
   const nonNullDice = column.filter((d) => d !== null) as DieValue[];
-  const result: Column = [undefined, undefined, undefined];
+  const result: Column = [null, null, null];
 
   // Fill from bottom (index 0) up
   for (let i = 0; i < nonNullDice.length; i++) {
@@ -98,7 +98,7 @@ function countRemovedDice(column: Column, dieValue: DieValue): number {
 export function applyMove(state: GameState, column: ColumnIndex): MoveResult | null {
   // Validate the move
   if (!isLegalMove(state, column) || state.currentDie === null) {
-    return;
+    return null;
   }
 
   const dieValue = state.currentDie;
@@ -122,7 +122,7 @@ export function applyMove(state: GameState, column: ColumnIndex): MoveResult | n
   const gameEnded = isGridFull(newGrids[currentPlayer]);
 
   // Determine winner if game ended
-  let winner: Player | "draw" | null;
+  let winner: Player | "draw" | null = null;
   if (gameEnded) {
     const { calculateGridScore } = require("./scorer");
     const score1 = calculateGridScore(newGrids.player1).total;
@@ -153,7 +153,7 @@ export function applyMove(state: GameState, column: ColumnIndex): MoveResult | n
 
   return {
     newState,
-    removedDice: removedCount > 0 ? { column, count: removedCount, value: dieValue } : undefined,
+    removedDice: removedCount > 0 ? { column, count: removedCount, value: dieValue } : null,
   };
 }
 

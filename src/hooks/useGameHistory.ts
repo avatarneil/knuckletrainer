@@ -43,7 +43,7 @@ interface UseGameHistoryReturn {
 }
 
 export function useGameHistory(): UseGameHistoryReturn {
-  const [savedSession, setSavedSession] = useState<GameSession | null>(undefined);
+  const [savedSession, setSavedSession] = useState<GameSession | null>(null);
   const [history, setHistory] = useState<GameHistoryEntry[]>([]);
   const [stats, setStats] = useState({
     draws: 0,
@@ -108,7 +108,7 @@ export function useGameHistory(): UseGameHistoryReturn {
 
   const discardGame = useCallback(() => {
     gameStorage.clearSession();
-    setSavedSession(undefined);
+    setSavedSession(null);
   }, []);
 
   const recordGameEnd = useCallback(
@@ -147,7 +147,7 @@ export function useGameHistory(): UseGameHistoryReturn {
 
       // Clear the session
       gameStorage.clearSession();
-      setSavedSession(undefined);
+      setSavedSession(null);
 
       // Refresh history
       setHistory(gameStorage.getHistory());

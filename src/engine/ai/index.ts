@@ -144,9 +144,9 @@ export class AIPlayer {
       if (state.phase === "placing" && state.currentDie !== null) {
         const grid = state.grids[state.currentPlayer];
         const legalColumns = ALL_COLUMNS.filter((i) => !isColumnFull(grid[i]));
-        return legalColumns[0] ?? undefined;
+        return legalColumns[0] ?? null;
       }
-      return;
+      return null;
     }
   }
 
@@ -255,8 +255,8 @@ export function getAIMove(
     if (state.phase === "placing" && state.currentDie !== null) {
       const grid = state.grids[state.currentPlayer];
       const legalColumns = ALL_COLUMNS.filter((i) => !isColumnFull(grid[i]));
-      return legalColumns[0] ?? undefined;
+      return legalColumns[0] ?? null;
     }
-    return;
+    return null;
   }
 }

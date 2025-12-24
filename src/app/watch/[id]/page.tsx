@@ -23,11 +23,11 @@ interface RoomState {
 export default function WatchRoomPage() {
   const params = useParams();
   const roomId = params.id as string;
-  const [roomState, setRoomState] = useState<RoomState | null>(undefined);
+  const [roomState, setRoomState] = useState<RoomState | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(undefined);
+  const [error, setError] = useState<string | null>(null);
   const [isFollowing, setIsFollowing] = useState(false);
-  const [watcherToken, setWatcherToken] = useState<string | null>(undefined);
+  const [watcherToken, setWatcherToken] = useState<string | null>(null);
   const isOnline = useOnlineStatus();
 
   // Get or create watcher token
@@ -52,7 +52,7 @@ export default function WatchRoomPage() {
     }
 
     try {
-      setError(undefined);
+      setError(null);
       const response = await fetch(`/api/rooms/${roomId}/state`);
       const data = await response.json();
 

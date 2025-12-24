@@ -52,7 +52,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
   }, [options.initialState]);
   const [isRolling, setIsRolling] = useState(false);
   const [isThinking, setIsThinking] = useState(false);
-  const [moveAnalysis, setMoveAnalysis] = useState<MoveAnalysis[] | null>(undefined);
+  const [moveAnalysis, setMoveAnalysis] = useState<MoveAnalysis[] | null>(null);
   const [isTrainingMode, setIsTrainingMode] = useState(options.trainingMode ?? false);
   const [difficulty, setDifficultyState] = useState<DifficultyLevel>(
     options.difficulty ?? "medium"
@@ -94,7 +94,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
           setMoveAnalysis(analysis.moves);
         }, 0);
       } else {
-        setMoveAnalysis(undefined);
+        setMoveAnalysis(null);
       }
     },
     [options.mode]
@@ -282,7 +282,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       }
 
       setState(result.newState);
-      setMoveAnalysis(undefined);
+      setMoveAnalysis(null);
 
       if (result.newState.phase === "ended" && result.newState.winner) {
         onGameEndRef.current?.(result.newState.winner);
@@ -302,7 +302,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     setIsThinking(false);
     const newState = createInitialState();
     setState(newState);
-    setMoveAnalysis(undefined);
+    setMoveAnalysis(null);
     setIsRolling(false);
   }, []);
 
@@ -316,7 +316,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       if (newValue && state.phase === "placing" && state.currentPlayer === "player1") {
         runMoveAnalysis(state);
       } else {
-        setMoveAnalysis(undefined);
+        setMoveAnalysis(null);
       }
       return newValue;
     });
