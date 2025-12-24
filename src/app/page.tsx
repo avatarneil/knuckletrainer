@@ -38,9 +38,9 @@ export default function Home() {
   const [trainingMode, setTrainingMode] = useState(false);
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 relative">
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 relative" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
       {/* Theme Switcher */}
-      <div className="absolute top-4 right-4">
+      <div className="absolute right-4" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))' }}>
         <ThemeSwitcher />
       </div>
 

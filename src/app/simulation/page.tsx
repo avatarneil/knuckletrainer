@@ -175,7 +175,7 @@ function SimulationContent() {
   }, []);
 
   return (
-    <main className="min-h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-auto pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <main className="min-h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-auto" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
       <InstallPrompt />
 
       {/* Header */}
