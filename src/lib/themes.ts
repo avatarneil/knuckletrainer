@@ -2,14 +2,17 @@
  * Theme definitions for the application
  */
 
+// prettier-ignore
+// biome-ignore format: semantic ordering - base themes first, then themed variants
+// oxfmt-ignore
 export type ThemeId =
-  | "legacy"
-  | "cult-of-the-lamb"
-  | "dark"
   | "light"
+  | "dark"
+  | "oled-dark"
+  | "legacy"
   | "ocean"
   | "forest"
-  | "oled-dark";
+  | "cult-of-the-lamb";
 
 export interface Theme {
   id: ThemeId;
@@ -283,14 +286,26 @@ export const oledDarkTheme: Theme = {
   name: "OLED Dark",
 };
 
+// prettier-ignore
+// biome-ignore format: semantic ordering - base themes first, then themed variants
+// oxfmt-ignore
 export const themes: Record<ThemeId, Theme> = {
-  "cult-of-the-lamb": cultOfTheLambTheme,
-  dark: darkTheme,
-  forest: forestTheme,
-  legacy: legacyTheme,
   light: lightTheme,
-  ocean: oceanTheme,
+  dark: darkTheme,
   "oled-dark": oledDarkTheme,
+  legacy: legacyTheme,
+  ocean: oceanTheme,
+  forest: forestTheme,
+  "cult-of-the-lamb": cultOfTheLambTheme,
 };
 
-export const themeIds: ThemeId[] = Object.keys(themes) as ThemeId[];
+/** Theme IDs in semantic order: base themes first, then themed variants */
+export const themeIds: ThemeId[] = [
+  "light",
+  "dark",
+  "oled-dark",
+  "legacy",
+  "ocean",
+  "forest",
+  "cult-of-the-lamb",
+];
