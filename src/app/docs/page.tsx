@@ -18,7 +18,7 @@ export default function DocsPage() {
   const difficultyLevels = getAllDifficultyLevels();
 
   return (
-    <main className="min-h-[100dvh] flex flex-col p-[clamp(1rem,3vw,2rem)] overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
+    <main className="min-h-[100dvh] flex flex-col p-[clamp(1rem,3vw,2rem)] overflow-auto" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
       <div className="max-w-4xl mx-auto w-full">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">

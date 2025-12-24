@@ -169,7 +169,7 @@ export default function WatchRoomPage() {
   }
 
   return (
-    <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden pt-[max(0.5rem,env(safe-area-inset-top))] pb-[max(0.5rem,env(safe-area-inset-bottom))]">
+    <main className="h-[100dvh] flex flex-col p-2 sm:p-4 md:p-6 overflow-hidden" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
       <InstallPrompt />
       {/* Header */}
       <header className="flex items-center justify-between mb-2 sm:mb-4 flex-shrink-0">

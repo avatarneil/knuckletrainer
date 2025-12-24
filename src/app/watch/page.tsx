@@ -104,7 +104,7 @@ export default function WatchPage() {
   return (
     <main className="min-h-[100dvh] flex flex-col p-4 sm:p-8 overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <InstallPrompt />
-      <Link href="/" className="absolute top-2 sm:top-4 left-2 sm:left-4">
+      <Link href="/" className="absolute left-2 sm:left-4" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}>
         <Button variant="ghost" size="sm" className="px-2 sm:px-3">
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline ml-2">Back</span>
@@ -112,7 +112,7 @@ export default function WatchPage() {
       </Link>
 
       {/* Connection status & Theme */}
-      <div className="absolute top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-2 sm:gap-3">
+      <div className="absolute right-2 sm:right-4 flex items-center gap-2 sm:gap-3" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}>
         <ThemeSwitcher />
         <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
           {isOnline ? (
