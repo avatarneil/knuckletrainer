@@ -59,9 +59,9 @@ export function GameBoard({
   const player2Score = calculateGridScore(state.grids.player2);
 
   return (
-    <div className="flex flex-col lg:flex-row items-center justify-between flex-1 w-full max-w-[min(95vw,clamp(20rem,80vw,56rem))] lg:max-w-[min(95vw,90rem)] mx-auto pt-[clamp(0.5rem,2vw,1rem)] pb-[clamp(0.25rem,1vw,0.5rem)] gap-4 lg:gap-8">
-      {/* Mobile: Opponent at top / Desktop: Player on left */}
-      <div className="contents lg:hidden">
+    <div className="flex flex-col lg:flex-row landscape-horizontal items-center justify-between flex-1 w-full max-w-[min(95vw,clamp(20rem,80vw,56rem))] lg:max-w-[min(95vw,90rem)] mx-auto pt-[clamp(0.5rem,2vw,1rem)] pb-[clamp(0.25rem,1vw,0.5rem)] gap-4 lg:gap-8">
+      {/* Mobile portrait: Opponent at top */}
+      <div className="contents lg:hidden landscape-hide">
         <PlayerGrid
           grid={state.grids.player2}
           playerName={player2Name}
@@ -77,8 +77,8 @@ export function GameBoard({
         />
       </div>
 
-      {/* Desktop only: Player grid on left */}
-      <div className="hidden lg:flex lg:flex-1 lg:justify-end">
+      {/* Desktop + Landscape: Player grid on left */}
+      <div className="hidden lg:flex lg:flex-1 lg:justify-end landscape-show landscape-grid-container landscape-grid-left">
         <PlayerGrid
           grid={state.grids.player1}
           playerName={player1Name}
@@ -95,7 +95,7 @@ export function GameBoard({
       </div>
 
       {/* Center section: Score + Dice */}
-      <div className="flex flex-col items-center gap-[clamp(0.5rem,1.5vmin,1rem)] lg:flex-shrink-0">
+      <div className="flex flex-col items-center gap-[clamp(0.5rem,1.5vmin,1rem)] lg:flex-shrink-0 landscape-compact-center">
         <ScoreCard
           player1Score={player1Score}
           player2Score={player2Score}
@@ -136,8 +136,8 @@ export function GameBoard({
         )}
       </div>
 
-      {/* Desktop only: Opponent grid on right */}
-      <div className="hidden lg:flex lg:flex-1 lg:justify-start">
+      {/* Desktop + Landscape: Opponent grid on right */}
+      <div className="hidden lg:flex lg:flex-1 lg:justify-start landscape-show landscape-grid-container landscape-grid-right">
         <PlayerGrid
           grid={state.grids.player2}
           playerName={player2Name}
@@ -153,8 +153,8 @@ export function GameBoard({
         />
       </div>
 
-      {/* Mobile only: Player grid at bottom */}
-      <div className="contents lg:hidden">
+      {/* Mobile portrait: Player grid at bottom */}
+      <div className="contents lg:hidden landscape-hide">
         <PlayerGrid
           grid={state.grids.player1}
           playerName={player1Name}
