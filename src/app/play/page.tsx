@@ -44,6 +44,7 @@ import { ALL_COLUMNS } from "@/engine/types";
 import { useGame } from "@/hooks/useGame";
 import { useGameHistory } from "@/hooks/useGameHistory";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import { getApiBaseUrl } from "@/lib/api";
 import { gameStorage } from "@/lib/game-storage";
 
 function PlayContent() {
@@ -84,7 +85,7 @@ function PlayContent() {
       return [];
     }
     try {
-      const response = await fetch(`/api/rooms/${publicRoomIdRef.current}/state`);
+      const response = await fetch(`${getApiBaseUrl()}/api/rooms/${publicRoomIdRef.current}/state`);
       const data = await response.json();
       if (data.success && data.followedBy) {
         return data.followedBy;
@@ -105,7 +106,7 @@ function PlayContent() {
       try {
         if (publicRoomIdRef.current) {
           // Update existing room
-          await fetch("/api/rooms/update-ai", {
+          await fetch(`${getApiBaseUrl()}/api/rooms/update-ai`, {
             body: JSON.stringify({
               roomId: publicRoomIdRef.current,
               state,
@@ -118,7 +119,7 @@ function PlayContent() {
           const followedBy = await getPreviousRoomFollowers();
 
           // Create new room
-          const response = await fetch("/api/rooms/create-ai", {
+          const response = await fetch(`${getApiBaseUrl()}/api/rooms/create-ai`, {
             body: JSON.stringify({
               playerName: "You",
               difficulty: gameDifficulty,

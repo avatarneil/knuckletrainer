@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { isNativeApp } from "@/lib/api";
 
 interface BeforeInstallPromptEvent extends Event {
   readonly platforms: string[];
@@ -67,6 +68,11 @@ export function useInstallPrompt() {
   const [isIOSDevice, setIsIOSDevice] = useState(false);
 
   useEffect(() => {
+    // Don't show PWA install prompt when running in a native Capacitor app
+    if (isNativeApp()) {
+      return;
+    }
+
     const ios = isIOS();
     setIsIOSDevice(ios);
 
