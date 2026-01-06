@@ -202,3 +202,36 @@ body::before {
 .glow-on-hover:hover {
   box-shadow: 0 0 15px hsl(var(--accent) / 0.4);
 }
+
+/* Mobile landscape layout support */
+/* Apply horizontal layout when in landscape orientation with sufficient width */
+@media (orientation: landscape) and (min-width: 480px) and (max-width: 1023px) {
+  .landscape-horizontal {
+    flex-direction: row !important;
+  }
+
+  .landscape-show {
+    display: flex !important;
+  }
+
+  .landscape-hide {
+    display: none !important;
+  }
+
+  /* Compact sizing for landscape mobile */
+  .landscape-compact-center {
+    flex-shrink: 0;
+  }
+
+  .landscape-grid-container {
+    flex: 1;
+  }
+
+  .landscape-grid-left {
+    justify-content: flex-end;
+  }
+
+  .landscape-grid-right {
+    justify-content: flex-start;
+  }
+}
