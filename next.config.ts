@@ -8,9 +8,9 @@ const nextConfig: NextConfig = {
   // Enable static export for Capacitor builds (native apps)
   ...(isCapacitorBuild && {
     output: "export",
-    // Exclude dynamic routes that require server-side data
-    // These features use the remote API anyway in native apps
-    excludeDefaultMomentLocales: true,
+    // Use trailing slashes to generate /page/index.html instead of /page.html
+    // This is required for Capacitor's WebView to handle client-side routing properly
+    trailingSlash: true,
   }),
   // Explicitly use webpack for WASM support (Turbopack doesn't fully support WASM yet)
   webpack: (config, { isServer }) => {

@@ -16,6 +16,7 @@
     "format": "oxfmt --write .",
     "format:check": "oxfmt --check .",
     "generate-icons": "node scripts/generate-icons.mjs",
+    "generate-app-icons": "node scripts/generate-app-icons.mjs",
     "cap:sync": "bunx cap sync",
     "cap:ios": "bunx cap open ios",
     "cap:android": "bunx cap open android"
