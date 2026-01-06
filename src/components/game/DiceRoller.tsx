@@ -71,32 +71,35 @@ export function DiceRoller({
         )}
       </div>
 
-      {/* Roll button or status */}
-      {canRoll ? (
-        <Button
-          onClick={onRoll}
-          disabled={isRolling}
-          variant="accent"
-          size="default"
-          className="font-bold text-[clamp(0.875rem,2.5vw,1rem)]"
-        >
-          <Dices className="mr-[clamp(0.375rem,1vw,0.5rem)] h-[clamp(1rem,3vw,1.25rem)] w-[clamp(1rem,3vw,1.25rem)]" />
-          {isRolling ? "Rolling..." : "Roll Dice"}
-        </Button>
-      ) : currentDie ? (
-        <div className="text-center">
-          <p className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
-            {playerName === "You" ? "Your turn" : `${playerName}'s turn`}
-          </p>
-          {isHuman && (
-            <p className="text-[clamp(0.875rem,2.5vw,1.125rem)] font-semibold text-accent">
-              Choose a column
+      {/* Roll button or status - fixed height container to prevent layout shifts */}
+      <div className="min-h-[clamp(2.5rem,7vmin,3.5rem)] flex items-center justify-center">
+        {canRoll ? (
+          <Button
+            onClick={onRoll}
+            disabled={isRolling}
+            variant="accent"
+            size="default"
+            className="font-bold text-[clamp(0.875rem,2.5vw,1rem)]"
+          >
+            <Dices className="mr-[clamp(0.375rem,1vw,0.5rem)] h-[clamp(1rem,3vw,1.25rem)] w-[clamp(1rem,3vw,1.25rem)]" />
+            {isRolling ? "Rolling..." : "Roll Dice"}
+          </Button>
+        ) : currentDie ? (
+          <div className="text-center">
+            <p className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">
+              {playerName === "You" ? "Your turn" : `${playerName}'s turn`}
             </p>
-          )}
-        </div>
-      ) : (
-        <div className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">Waiting...</div>
-      )}
+            <p className={cn(
+              "text-[clamp(0.875rem,2.5vw,1.125rem)] font-semibold",
+              isHuman ? "text-accent" : "text-muted-foreground/50"
+            )}>
+              {isHuman ? "Choose a column" : "Thinking..."}
+            </p>
+          </div>
+        ) : (
+          <div className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">Waiting...</div>
+        )}
+      </div>
     </div>
   );
 }

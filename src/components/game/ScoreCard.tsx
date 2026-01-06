@@ -28,8 +28,8 @@ export function ScoreCard({
       {/* Player 1 */}
       <div
         className={cn(
-          "flex flex-col items-center gap-[clamp(0.125rem,0.5vw,0.25rem)] transition-all",
-          currentPlayer === "player1" && "scale-105",
+          "flex flex-col items-center gap-[clamp(0.125rem,0.5vw,0.25rem)] transition-colors",
+          currentPlayer === "player1" && "text-accent",
           winner === "player1" && "text-accent"
         )}
       >
@@ -78,8 +78,8 @@ export function ScoreCard({
       {/* Player 2 */}
       <div
         className={cn(
-          "flex flex-col items-center gap-[clamp(0.125rem,0.5vw,0.25rem)] transition-all",
-          currentPlayer === "player2" && "scale-105",
+          "flex flex-col items-center gap-[clamp(0.125rem,0.5vw,0.25rem)] transition-colors",
+          currentPlayer === "player2" && "text-accent",
           winner === "player2" && "text-accent"
         )}
       >
