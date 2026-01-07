@@ -3,7 +3,7 @@ Policy-Value Network for Knucklebones
 
 Architecture matches the WASM implementation:
 - Input: 43 features (state encoding)
-- Hidden: 64 neurons with ReLU
+- Hidden: 128 neurons with ReLU
 - Output: Policy (3 columns, softmax) + Value (tanh)
 """
 
@@ -16,19 +16,19 @@ from typing import Tuple
 
 # Network dimensions (must match WASM)
 STATE_ENCODING_SIZE = 43
-HIDDEN_SIZE = 64
+HIDDEN_SIZE = 128  # Doubled from 64 for more capacity
 POLICY_OUTPUT_SIZE = 3
 
 
 class PolicyValueNetwork(nn.Module):
     """
     Simple MLP for policy and value prediction.
-    
+
     Architecture:
-    - Linear: input (43) -> hidden (64)
+    - Linear: input (43) -> hidden (128)
     - ReLU activation
-    - Policy head: Linear hidden (64) -> policy (3), then softmax
-    - Value head: Linear hidden (64) -> value (1), then tanh
+    - Policy head: Linear hidden (128) -> policy (3), then softmax
+    - Value head: Linear hidden (128) -> value (1), then tanh
     """
     
     def __init__(self):

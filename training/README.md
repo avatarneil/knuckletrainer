@@ -217,10 +217,10 @@ The policy-value network has the following architecture:
   - 1 feature for current player
   - 6 features for current die (one-hot)
 
-- **Hidden**: 64 neurons with ReLU activation
+- **Hidden**: 128 neurons with ReLU activation
 
 - **Output**:
   - Policy head: 3 neurons (one per column), softmax activation
   - Value head: 1 neuron, tanh activation
 
-Total parameters: ~3,000 weights
+Total parameters: ~6,000 weights

@@ -1294,7 +1294,7 @@ fn order_moves_with_profile(
 /// 6 faces × 3 columns × 2 players = 36 + 1 (player) + 6 (die one-hot) = 43
 
 const STATE_ENCODING_SIZE: usize = 43;
-const HIDDEN_SIZE: usize = 64;
+const HIDDEN_SIZE: usize = 128;  // Doubled from 64 for more capacity
 const POLICY_OUTPUT_SIZE: usize = 3;  // 3 columns
 
 /// Encode game state into feature vector
