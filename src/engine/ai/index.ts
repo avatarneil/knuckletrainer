@@ -45,6 +45,9 @@ export {
   getNeuralPolicyValue,
 } from "./wasm-bindings";
 
+// WASM initialization and cache management
+export { initWasm, clearWasmCache };
+
 // Master AI exports
 export {
   getMasterMove,
