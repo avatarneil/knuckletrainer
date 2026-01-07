@@ -17,7 +17,7 @@ import time
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor, as_completed
 from multiprocessing import cpu_count
 from pathlib import Path
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 import numpy as np
 import torch
@@ -25,6 +25,12 @@ import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm
+
+try:
+    import wandb
+    WANDB_AVAILABLE = True
+except ImportError:
+    WANDB_AVAILABLE = False
 
 from game import GameState, Player, get_game_result
 from inference_server import InferenceServer
@@ -252,6 +258,8 @@ def train(
     lr_decay: float = 0.95,
     switch_to_network_at: int = 10,
     parallel_network: bool = False,
+    use_wandb: bool = False,
+    start_iteration: int = 0,
 ) -> PolicyValueNetwork:
     """
     Main training loop.
@@ -266,6 +274,8 @@ def train(
         switch_to_network_at: After this many iterations, switch from parallel heuristic
                               to sequential network-guided self-play for better quality
         parallel_network: Use threaded parallel with shared inference server (MPS optimized)
+        use_wandb: Enable Weights & Biases logging
+        start_iteration: Starting iteration number (for resumed training)
     """
     if device is None:
         device = get_device()
@@ -292,7 +302,8 @@ def train(
     max_samples = 100000  # Keep training set manageable
     
     for iteration in range(num_iterations):
-        print(f"\n=== Iteration {iteration + 1}/{num_iterations} ===")
+        global_iteration = start_iteration + iteration + 1
+        print(f"\n=== Iteration {iteration + 1}/{num_iterations} (global: {global_iteration}) ===")
         current_lr = optimizer.param_groups[0]['lr']
         print(f"Learning rate: {current_lr:.6f}")
         
@@ -372,14 +383,29 @@ def train(
             )
             print(f"  Epoch {epoch + 1}/{epochs_per_iteration}: "
                   f"loss={total_loss:.4f} (policy={policy_loss:.4f}, value={value_loss:.4f})")
-        
+
+            # Log epoch metrics to wandb
+            if use_wandb and WANDB_AVAILABLE:
+                metrics = {
+                    "epoch": (iteration * epochs_per_iteration) + epoch + 1,
+                    "iteration": global_iteration,
+                    "loss/total": total_loss,
+                    "loss/policy": policy_loss,
+                    "loss/value": value_loss,
+                    "learning_rate": current_lr,
+                    "samples": len(combined_states),
+                    "games_per_sec": games_per_sec,
+                }
+                wandb.log(metrics)
+                print(f"    [wandb] logged: loss={total_loss:.4f}")
+
         # Step the learning rate scheduler
         scheduler.step()
-        
+
         # Save checkpoint
-        checkpoint_path = os.path.join(output_dir, f"checkpoint_{iteration + 1}.pt")
+        checkpoint_path = os.path.join(output_dir, f"checkpoint_{global_iteration}.pt")
         torch.save({
-            "iteration": iteration + 1,
+            "iteration": global_iteration,
             "model_state_dict": network.state_dict(),
             "optimizer_state_dict": optimizer.state_dict(),
             "scheduler_state_dict": scheduler.state_dict(),
@@ -418,7 +444,10 @@ def main():
     parser.add_argument("--workers", type=int, default=None, help="Number of parallel workers/threads")
     parser.add_argument("--switch-at", type=int, default=10,
                         help="Switch from parallel to network-guided self-play after N iterations")
-    
+    parser.add_argument("--wandb", action="store_true", help="Enable Weights & Biases logging")
+    parser.add_argument("--wandb-project", type=str, default="knucklebones", help="W&B project name")
+    parser.add_argument("--wandb-name", type=str, default=None, help="W&B run name")
+
     args = parser.parse_args()
     
     # Create or load network
@@ -461,6 +490,33 @@ def main():
         else:
             print("Network-guided self-play (slower but higher quality)")
 
+    # Initialize wandb if enabled
+    use_wandb = args.wandb and WANDB_AVAILABLE
+    if args.wandb and not WANDB_AVAILABLE:
+        print("Warning: --wandb flag set but wandb not installed. Run: pip install wandb")
+    if use_wandb:
+        wandb.init(
+            project=args.wandb_project,
+            name=args.wandb_name,
+            config={
+                "iterations": args.iterations,
+                "games_per_iteration": args.games,
+                "simulations_per_move": args.simulations,
+                "epochs_per_iteration": args.epochs,
+                "batch_size": args.batch_size,
+                "learning_rate": args.lr,
+                "lr_decay": args.lr_decay,
+                "parallel": parallel,
+                "parallel_network": parallel_network,
+                "workers": args.workers,
+                "switch_at": args.switch_at,
+                "device": str(device),
+                "start_iteration": start_iteration,
+            },
+            resume="allow",
+        )
+        print(f"Weights & Biases logging enabled: {wandb.run.url}")
+
     network = train(
         network=network,
         num_iterations=args.iterations,
@@ -476,12 +532,18 @@ def main():
         lr_decay=args.lr_decay,
         switch_to_network_at=args.switch_at,
         parallel_network=parallel_network,
+        use_wandb=use_wandb,
+        start_iteration=start_iteration,
     )
-    
+
+    # Finish wandb run
+    if use_wandb:
+        wandb.finish()
+
     # Export weights
     export_path = os.path.join(args.output_dir, args.export)
     export_weights(network, export_path)
-    
+
     print("\nTraining complete!")
 
 
