@@ -261,6 +261,7 @@ def train(
     use_wandb: bool = False,
     start_iteration: int = 0,
     replay_window: int = 3,
+    resume_checkpoint: dict = None,
 ) -> PolicyValueNetwork:
     """
     Main training loop.
@@ -293,7 +294,16 @@ def train(
 
     optimizer = optim.Adam(network.parameters(), lr=learning_rate)
     scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=lr_decay)
-    
+
+    # Restore optimizer/scheduler state for seamless resume
+    if resume_checkpoint is not None:
+        if "optimizer_state_dict" in resume_checkpoint:
+            optimizer.load_state_dict(resume_checkpoint["optimizer_state_dict"])
+            print(f"  Restored optimizer state (LR: {optimizer.param_groups[0]['lr']:.6f})")
+        if "scheduler_state_dict" in resume_checkpoint:
+            scheduler.load_state_dict(resume_checkpoint["scheduler_state_dict"])
+            print(f"  Restored scheduler state")
+
     os.makedirs(output_dir, exist_ok=True)
     
     # Accumulated training data (limit to recent iterations to avoid stale value targets)
@@ -447,20 +457,21 @@ def main():
     # Create or load network
     network = create_network()
     start_iteration = 0
-    
+    resume_checkpoint = None
+
     # Detect best device
     device = get_device()
 
     if args.resume:
         print(f"Resuming from {args.resume}")
         # Map checkpoint to current device (handles MPS->CUDA or CUDA->MPS transfers)
-        checkpoint = torch.load(args.resume, weights_only=False, map_location=device)
-        state_dict = checkpoint["model_state_dict"]
+        resume_checkpoint = torch.load(args.resume, weights_only=False, map_location=device)
+        state_dict = resume_checkpoint["model_state_dict"]
         # Handle state dicts from torch.compile() wrapped models
         if any(k.startswith("_orig_mod.") for k in state_dict.keys()):
             state_dict = {k.replace("_orig_mod.", ""): v for k, v in state_dict.items()}
         network.load_state_dict(state_dict)
-        start_iteration = checkpoint.get("iteration", 0)
+        start_iteration = resume_checkpoint.get("iteration", 0)
         print(f"  Resuming from iteration {start_iteration}")
     print(f"Using device: {device}")
     if device.type == "mps":
@@ -530,6 +541,7 @@ def main():
         use_wandb=use_wandb,
         start_iteration=start_iteration,
         replay_window=args.replay_window,
+        resume_checkpoint=resume_checkpoint,
     )
 
     # Finish wandb run
