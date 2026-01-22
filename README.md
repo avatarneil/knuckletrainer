@@ -91,3 +91,53 @@ The project is configured for automatic WASM builds in CI/CD:
 - **Vercel**: Automatically builds WASM during deployment (see `vercel.json` and `vercel-build.sh`)
 
 For detailed deployment instructions, see [README-DEPLOYMENT.md](README-DEPLOYMENT.md).
+
+## Native Apps (iOS/Android)
+
+The project uses Capacitor for native mobile builds.
+
+### Building for iOS
+
+```bash
+# Build static export
+bun run build:native
+
+# Sync with native project
+bun run cap:sync
+
+# Open in Xcode
+bun run cap:ios
+```
+
+From Xcode: Product → Archive → Distribute App
+
+### Building for Android
+
+```bash
+bun run build:native
+bun run cap:sync
+bun run cap:android
+```
+
+## App Store Screenshots
+
+Automated screenshot generation for App Store Connect using Playwright.
+
+```bash
+# Start dev server
+bun run dev
+
+# Generate screenshots (in another terminal)
+bun run screenshots
+```
+
+Screenshots are saved to `screenshots/appstore/` organized by device:
+
+| Folder | Device | Resolution |
+|--------|--------|------------|
+| `iPhone-6.9/` | iPhone 16 Pro Max | 1320 x 2868 |
+| `iPhone-6.5/` | iPhone 11 Pro Max | 1242 x 2688 |
+| `iPhone-5.5/` | iPhone 8 Plus | 1242 x 2208 |
+| `iPad-12.9/` | iPad Pro 12.9" | 2048 x 2732 |
+
+Screens captured: Home, Play, AI vs AI, Simulation

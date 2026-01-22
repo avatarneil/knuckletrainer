@@ -84,6 +84,9 @@ wasm/target/
 # Wandb
 **/wandb/
 
+# Screenshots
+/screenshots/
+
 # Remotion
 remotion/node_modules/
 remotion/out/

@@ -1,6 +1,6 @@
 {
   "name": "knuckletrainer",
-  "version": "0.1.0",
+  "version": "1.5.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -19,7 +19,8 @@
     "generate-app-icons": "node scripts/generate-app-icons.mjs",
     "cap:sync": "bunx cap sync",
     "cap:ios": "bunx cap open ios",
-    "cap:android": "bunx cap open android"
+    "cap:android": "bunx cap open android",
+    "screenshots": "bun run scripts/appstore-screenshots.ts"
   },
   "dependencies": {
     "@capacitor/android": "^8.0.0",
@@ -43,6 +44,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^8.0.0",
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -50,6 +52,7 @@
     "babel-plugin-react-compiler": "1.0.0",
     "oxfmt": "0.18.0",
     "oxlint": "1.33.0",
+    "playwright": "^1.57.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
     "typescript": "^5",
