@@ -7,12 +7,13 @@
 import { NextResponse } from "next/server";
 import { getPublicRoomState, getPublicRooms } from "@/lib/kv";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const watcherToken = request.headers.get("x-watcher-token");
     const rooms = await getPublicRooms();
 
     // Return public state for each room (without sensitive data)
-    const publicRooms = rooms.map((room) => getPublicRoomState(room));
+    const publicRooms = rooms.map((room) => getPublicRoomState(room, watcherToken));
 
     return NextResponse.json({
       rooms: publicRooms,

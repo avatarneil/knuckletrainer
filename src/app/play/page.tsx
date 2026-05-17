@@ -79,26 +79,9 @@ function PlayContent() {
   // Key to force remount of game hook when starting fresh or resuming
   const [_gameKey, setGameKey] = useState(0);
 
-  // Get followers from previous room
-  const getPreviousRoomFollowers = useCallback(async (): Promise<string[]> => {
-    if (!publicRoomIdRef.current) {
-      return [];
-    }
-    try {
-      const response = await fetch(`${getApiBaseUrl()}/api/rooms/${publicRoomIdRef.current}/state`);
-      const data = await response.json();
-      if (data.success && data.followedBy) {
-        return data.followedBy;
-      }
-    } catch (error) {
-      console.error("Error getting previous room followers:", error);
-    }
-    return [];
-  }, []);
-
   // Create or update public room
   const updatePublicRoom = useCallback(
-    async (state: GameState) => {
+    async (state: GameState, options?: { previousRoomId?: string | null }) => {
       if (!isPublicMatch) {
         return;
       }
@@ -115,16 +98,13 @@ function PlayContent() {
             method: "POST",
           });
         } else {
-          // Get followers from previous room if it exists
-          const followedBy = await getPreviousRoomFollowers();
-
           // Create new room
           const response = await fetch(`${getApiBaseUrl()}/api/rooms/create-ai`, {
             body: JSON.stringify({
               playerName: "You",
               difficulty: gameDifficulty,
               initialState: state,
-              followedBy, // Migrate followers
+              previousRoomId: options?.previousRoomId ?? null,
             }),
             headers: { "Content-Type": "application/json" },
             method: "POST",
@@ -141,7 +121,7 @@ function PlayContent() {
         console.error("Error updating public room:", error);
       }
     },
-    [isPublicMatch, gameDifficulty, getPreviousRoomFollowers]
+    [isPublicMatch, gameDifficulty]
   );
 
   const startNewSession = useCallback(async () => {
@@ -157,8 +137,9 @@ function PlayContent() {
 
     // If public match is enabled, create a new room
     if (isPublicMatch) {
+      const previousRoomId = publicRoomIdRef.current;
       publicRoomIdRef.current = null; // Reset to create new room
-      await updatePublicRoom(newState);
+      await updatePublicRoom(newState, { previousRoomId });
     }
 
     setGameInitialState(newState);
@@ -287,8 +268,9 @@ function PlayContent() {
 
     // If public match is enabled, create a new room (followers will auto-join)
     if (isPublicMatch) {
+      const previousRoomId = publicRoomIdRef.current;
       publicRoomIdRef.current = null; // Reset to create new room
-      await updatePublicRoom(newState);
+      await updatePublicRoom(newState, { previousRoomId });
     }
   }, [game, gameHistory, isPublicMatch, updatePublicRoom]);
 
@@ -371,7 +353,13 @@ function PlayContent() {
   }
 
   return (
-    <main className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))",
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
+    >
       <InstallPrompt />
       {/* Header */}
       <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">

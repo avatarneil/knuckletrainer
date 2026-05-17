@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, Eye, Loader2, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import { ArrowLeft, Clock, Eye, Heart, Loader2, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { InstallPrompt } from "@/components/pwa";
@@ -9,6 +9,13 @@ import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useOnlineStatus } from "@/hooks/usePWA";
 import { getApiBaseUrl } from "@/lib/api";
+import {
+  getFollowedRoomIds,
+  getRecentRoomIds,
+  getSpectatorToken,
+  readSpectatorMatchRecords,
+  type SpectatorMatchRecord,
+} from "@/lib/spectator";
 
 interface PublicRoom {
   roomId: string;
@@ -23,6 +30,10 @@ interface PublicRoom {
   player2: { name: string } | null;
   gameType: "multiplayer" | "ai";
   watcherCount: number;
+  followerCount: number;
+  isFollowedByCurrentWatcher: boolean;
+  previousRoomId: string | null;
+  successorRoomId: string | null;
   lastActivity: number;
 }
 
@@ -30,7 +41,14 @@ export default function WatchPage() {
   const [rooms, setRooms] = useState<PublicRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [watcherToken, setWatcherToken] = useState<string | null>(null);
+  const [matchRecords, setMatchRecords] = useState<SpectatorMatchRecord[]>([]);
   const isOnline = useOnlineStatus();
+
+  useEffect(() => {
+    setWatcherToken(getSpectatorToken());
+    setMatchRecords(readSpectatorMatchRecords());
+  }, []);
 
   const fetchRooms = useCallback(async () => {
     if (!isOnline) {
@@ -41,7 +59,9 @@ export default function WatchPage() {
 
     try {
       setError(null);
-      const response = await fetch(`${getApiBaseUrl()}/api/rooms/public`);
+      const response = await fetch(`${getApiBaseUrl()}/api/rooms/public`, {
+        headers: watcherToken ? { "x-watcher-token": watcherToken } : undefined,
+      });
       const data = await response.json();
 
       if (data.success) {
@@ -55,7 +75,7 @@ export default function WatchPage() {
     } finally {
       setLoading(false);
     }
-  }, [isOnline]);
+  }, [isOnline, watcherToken]);
 
   useEffect(() => {
     fetchRooms();
@@ -98,10 +118,34 @@ export default function WatchPage() {
     }
   };
 
+  const recentRoomIds = getRecentRoomIds(matchRecords);
+  const followedRoomIds = getFollowedRoomIds(matchRecords);
+  const isFollowedRoom = (room: PublicRoom): boolean =>
+    room.isFollowedByCurrentWatcher ||
+    followedRoomIds.has(room.roomId) ||
+    (room.previousRoomId !== null && followedRoomIds.has(room.previousRoomId));
+  const isRecentRoom = (room: PublicRoom): boolean =>
+    recentRoomIds.has(room.roomId) ||
+    (room.previousRoomId !== null && recentRoomIds.has(room.previousRoomId));
+  const sortedRooms = rooms.toSorted((a, b) => {
+    const priorityA = (isFollowedRoom(a) ? 2 : 0) + (isRecentRoom(a) ? 1 : 0);
+    const priorityB = (isFollowedRoom(b) ? 2 : 0) + (isRecentRoom(b) ? 1 : 0);
+
+    if (priorityA !== priorityB) {
+      return priorityB - priorityA;
+    }
+
+    return b.lastActivity - a.lastActivity;
+  });
+
   return (
     <main className="min-h-[100dvh] flex flex-col p-4 sm:p-8 overflow-auto pt-[max(1rem,env(safe-area-inset-top))] pb-[max(1rem,env(safe-area-inset-bottom))]">
       <InstallPrompt />
-      <Link href="/" className="absolute left-2 sm:left-4" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}>
+      <Link
+        href="/"
+        className="absolute left-2 sm:left-4"
+        style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
+      >
         <Button variant="ghost" size="sm" className="px-2 sm:px-3">
           <ArrowLeft className="h-4 w-4" />
           <span className="hidden sm:inline ml-2">Back</span>
@@ -109,7 +153,10 @@ export default function WatchPage() {
       </Link>
 
       {/* Connection status & Theme */}
-      <div className="absolute right-2 sm:right-4 flex items-center gap-2 sm:gap-3" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))' }}>
+      <div
+        className="absolute right-2 sm:right-4 flex items-center gap-2 sm:gap-3"
+        style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))" }}
+      >
         <ThemeSwitcher />
         <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
           {isOnline ? (
@@ -178,58 +225,83 @@ export default function WatchPage() {
       {/* Room list */}
       {!loading && !error && rooms.length > 0 && (
         <div className="grid gap-4 max-w-4xl mx-auto w-full">
-          {rooms.map((room) => (
-            <Card
-              key={room.roomId}
-              className="hover:border-accent/50 transition-all cursor-pointer"
-              onClick={() => {
-                window.location.href = `/watch/${room.roomId}`;
-              }}
-            >
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                      <span className="font-mono text-accent">{room.roomId}</span>
-                      <span className="text-xs font-normal text-muted-foreground px-2 py-0.5 rounded bg-muted">
-                        {room.gameType === "ai" ? "AI Match" : "Multiplayer"}
-                      </span>
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      {room.player1?.name ?? "Player 1"} vs {room.player2?.name ?? "Player 2"}
-                    </CardDescription>
-                  </div>
-                  <div className="flex items-center gap-1 text-muted-foreground text-sm">
-                    <Eye className="w-4 h-4" />
-                    <span>{room.watcherCount}</span>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-4">
-                    <div>
-                      <span className="text-muted-foreground">Turn: </span>
-                      <span className="font-medium">{room.state.turnNumber}</span>
+          {sortedRooms.map((room) => {
+            const followed = isFollowedRoom(room);
+            const recent = isRecentRoom(room);
+
+            return (
+              <Card
+                key={room.roomId}
+                className={`hover:border-accent/50 transition-all cursor-pointer ${
+                  followed ? "border-accent/60 bg-accent/5" : ""
+                }`}
+                onClick={() => {
+                  window.location.href = `/watch/${room.roomId}`;
+                }}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <span className="font-mono text-accent">{room.roomId}</span>
+                        <span className="text-xs font-normal text-muted-foreground px-2 py-0.5 rounded bg-muted">
+                          {room.gameType === "ai" ? "AI Match" : "Multiplayer"}
+                        </span>
+                        {followed && (
+                          <span className="inline-flex items-center gap-1 rounded bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
+                            <Heart className="h-3 w-3 fill-current" />
+                            Following
+                          </span>
+                        )}
+                        {!followed && recent && (
+                          <span className="inline-flex items-center gap-1 rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                            <Clock className="h-3 w-3" />
+                            Recent
+                          </span>
+                        )}
+                      </CardTitle>
+                      <CardDescription className="mt-1">
+                        {room.player1?.name ?? "Player 1"} vs {room.player2?.name ?? "Player 2"}
+                      </CardDescription>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground">Score: </span>
-                      <span className="font-medium">
-                        {room.state.player1Score} - {room.state.player2Score}
-                      </span>
-                    </div>
-                    <div>
-                      <span className="text-muted-foreground">Status: </span>
-                      <span className="font-medium">{getPhaseLabel(room.state.phase)}</span>
+                    <div className="flex items-center gap-1 text-muted-foreground text-sm">
+                      <Eye className="w-4 h-4" />
+                      <span>{room.watcherCount}</span>
                     </div>
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {formatTimeAgo(room.lastActivity)}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-4">
+                      <div>
+                        <span className="text-muted-foreground">Turn: </span>
+                        <span className="font-medium">{room.state.turnNumber}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Score: </span>
+                        <span className="font-medium">
+                          {room.state.player1Score} - {room.state.player2Score}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Status: </span>
+                        <span className="font-medium">{getPhaseLabel(room.state.phase)}</span>
+                      </div>
+                      {room.followerCount > 0 && (
+                        <div className="hidden sm:block">
+                          <span className="text-muted-foreground">Following: </span>
+                          <span className="font-medium">{room.followerCount}</span>
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {formatTimeAgo(room.lastActivity)}
+                    </span>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </div>
       )}
     </main>
