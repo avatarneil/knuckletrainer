@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { getScores } from "@/engine/state";
 import type { DifficultyLevel, GameState, Player } from "@/engine/types";
+import type { PostGameCoachBrief } from "@/engine/post-game-coach";
 import { gameStorage, generateSessionId } from "@/lib/game-storage";
 import type { GameHistoryEntry, GameSession } from "@/lib/game-storage";
 
@@ -35,7 +36,12 @@ interface UseGameHistoryReturn {
   /** Discard the saved game without recording */
   discardGame: () => void;
   /** Record a completed game to history and clear the session */
-  recordGameEnd: (sessionId: string, state: GameState, winner: Player | "draw") => void;
+  recordGameEnd: (
+    sessionId: string,
+    state: GameState,
+    winner: Player | "draw",
+    coach?: PostGameCoachBrief | null
+  ) => void;
   /** Clear all history */
   clearHistory: () => void;
   /** Refresh state from storage */
@@ -112,7 +118,12 @@ export function useGameHistory(): UseGameHistoryReturn {
   }, []);
 
   const recordGameEnd = useCallback(
-    (sessionId: string, state: GameState, winner: Player | "draw") => {
+    (
+      sessionId: string,
+      state: GameState,
+      winner: Player | "draw",
+      coach?: PostGameCoachBrief | null
+    ) => {
       const session = gameStorage.loadSession();
       if (!session || session.id !== sessionId) {
         // Session doesn't match, create entry from current info
@@ -127,6 +138,7 @@ export function useGameHistory(): UseGameHistoryReturn {
           trainingMode: false,
           turnCount: state.turnNumber,
           winner,
+          ...(coach ? { coach } : {}),
         };
         gameStorage.addToHistory(entry);
       } else {
@@ -141,6 +153,7 @@ export function useGameHistory(): UseGameHistoryReturn {
           trainingMode: session.trainingMode,
           turnCount: state.turnNumber,
           winner,
+          ...(coach ? { coach } : {}),
         };
         gameStorage.addToHistory(entry);
       }

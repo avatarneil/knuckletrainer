@@ -84,6 +84,12 @@ export {
   serializeState,
   statesEqual,
 } from "./state";
+// Post-game coaching
+export {
+  buildPostGameCoachBrief,
+  type PostGameCoachBrief,
+  type PostGameCoachMoment,
+} from "./post-game-coach";
 // Training
 export { analyzeAllMoves, deepAnalysis, quickAnalysis, simulateMove } from "./training";
 // Types
