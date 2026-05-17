@@ -4,12 +4,20 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   applyMove,
   createInitialState,
+  endMasterGame,
   getAIMove,
   getLegalMoves,
   quickAnalysis,
+  recordOpponentMoveForLearning,
   rollDie,
 } from "@/engine";
-import type { ColumnIndex, DifficultyLevel, GameState, MoveAnalysis } from "@/engine/types";
+import type {
+  ColumnIndex,
+  DieValue,
+  DifficultyLevel,
+  GameState,
+  MoveAnalysis,
+} from "@/engine/types";
 
 interface UseGameOptions {
   mode: "ai" | "pvp" | "training" | "ai-vs-ai";
@@ -100,6 +108,15 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     [options.mode]
   );
 
+  const finishMasterLearningGame = useCallback(
+    (gameState: GameState) => {
+      if (options.mode === "ai" && difficulty === "master" && gameState.phase === "ended") {
+        endMasterGame("player2");
+      }
+    },
+    [options.mode, difficulty]
+  );
+
   const handleAITurn = useCallback(
     (gameState: GameState) => {
       const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";
@@ -159,6 +176,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
             if (move !== null) {
               const result = applyMove(currentState, move);
               if (result) {
+                finishMasterLearningGame(result.newState);
                 setState(result.newState);
                 isProcessingAITurn.current = false;
                 setIsThinking(false);
@@ -185,6 +203,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
           if (move !== null) {
             const result = applyMove(currentState, move);
             if (result) {
+              finishMasterLearningGame(result.newState);
               setState(result.newState);
               isProcessingAITurn.current = false;
               setIsThinking(false);
@@ -215,6 +234,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       options.player1Difficulty,
       options.player2Difficulty,
       difficulty,
+      finishMasterLearningGame,
       isTrainingMode,
       runMoveAnalysis,
     ]
@@ -276,10 +296,28 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         return;
       }
 
+      const shouldRecordHumanMoveForMaster =
+        options.mode === "ai" &&
+        difficulty === "master" &&
+        state.currentPlayer === "player1" &&
+        state.currentDie !== null;
+
+      if (shouldRecordHumanMoveForMaster) {
+        recordOpponentMoveForLearning(
+          state,
+          column,
+          state.currentDie as DieValue,
+          "player1",
+          "player2"
+        );
+      }
+
       const result = applyMove(state, column);
       if (!result) {
         return;
       }
+
+      finishMasterLearningGame(result.newState);
 
       setState(result.newState);
       setMoveAnalysis(null);
@@ -291,7 +329,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         handleAITurn(result.newState);
       }
     },
-    [state, handleAITurn]
+    [state, handleAITurn, options.mode, difficulty, finishMasterLearningGame]
   );
 
   const resetGame = useCallback(() => {

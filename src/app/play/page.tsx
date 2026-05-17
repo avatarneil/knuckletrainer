@@ -17,7 +17,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { GameBoard, KeyboardShortcuts } from "@/components/game";
 import { InstallPrompt } from "@/components/pwa";
-import { WinProbability } from "@/components/training";
+import { MasterProfilePanel, WinProbability } from "@/components/training";
 import { Button } from "@/components/ui/button";
 import { ThemeSwitcher } from "@/components/ui/theme-switcher";
 import {
@@ -37,7 +37,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { DIFFICULTY_CONFIGS, createInitialState } from "@/engine";
+import {
+  DIFFICULTY_CONFIGS,
+  createInitialState,
+  getMasterProfileStats,
+  isMasterReady,
+  resetMasterProfile,
+  type MasterProfileStats,
+} from "@/engine";
 import { isColumnFull } from "@/engine/scorer";
 import type { ColumnIndex, DifficultyLevel, GameState } from "@/engine/types";
 import { ALL_COLUMNS } from "@/engine/types";
@@ -242,6 +249,32 @@ function PlayContent() {
     onStateChange: handleStateChange,
     trainingMode: gameTrainingMode,
   });
+  const [masterProfileStats, setMasterProfileStats] = useState<MasterProfileStats>(() =>
+    getMasterProfileStats("player2")
+  );
+  const [isMasterProfileAvailable, setIsMasterProfileAvailable] = useState(false);
+  const isMasterDifficulty = game.difficulty === "master";
+
+  const refreshMasterProfile = useCallback(() => {
+    setMasterProfileStats(getMasterProfileStats("player2"));
+    setIsMasterProfileAvailable(isMasterReady("player2"));
+  }, []);
+
+  useEffect(() => {
+    if (!isMasterDifficulty) {
+      return;
+    }
+
+    refreshMasterProfile();
+    const refreshId = window.setInterval(refreshMasterProfile, 1000);
+
+    return () => window.clearInterval(refreshId);
+  }, [game.state.phase, game.state.turnNumber, isMasterDifficulty, refreshMasterProfile]);
+
+  const handleResetMasterProfile = useCallback(() => {
+    resetMasterProfile("player2");
+    refreshMasterProfile();
+  }, [refreshMasterProfile]);
 
   // Calculate legal columns and game state for keyboard controls
   const isPlayer1Turn = game.state.currentPlayer === "player1";
@@ -371,7 +404,13 @@ function PlayContent() {
   }
 
   return (
-    <main className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))",
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
+    >
       <InstallPrompt />
       {/* Header */}
       <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">
@@ -525,6 +564,14 @@ function PlayContent() {
               </p>
             </div>
 
+            {isMasterDifficulty && (
+              <MasterProfilePanel
+                stats={masterProfileStats}
+                isAvailable={isMasterProfileAvailable}
+                onReset={handleResetMasterProfile}
+              />
+            )}
+
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <Label htmlFor="settings-public">Public Match</Label>
@@ -601,6 +648,14 @@ function PlayContent() {
                   : "It's a draw!"}
             </DialogDescription>
           </DialogHeader>
+
+          {isMasterDifficulty && (
+            <MasterProfilePanel
+              stats={masterProfileStats}
+              isAvailable={isMasterProfileAvailable}
+              onReset={handleResetMasterProfile}
+            />
+          )}
 
           <DialogFooter className="flex gap-2">
             <Button variant="outline" onClick={() => setShowGameOver(false)}>
