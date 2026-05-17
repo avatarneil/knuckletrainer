@@ -4,4 +4,5 @@ export { useGameHistory } from "./useGameHistory";
 export { useKeyboardControls } from "./useKeyboardControls";
 export { useMultiplayer } from "./useMultiplayer";
 export { useInstallPrompt, useOnlineStatus } from "./usePWA";
+export { useReviewQueue } from "./useReviewQueue";
 export { useTraining } from "./useTraining";
