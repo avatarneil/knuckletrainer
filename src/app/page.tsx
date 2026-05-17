@@ -21,11 +21,21 @@ import type { DifficultyLevel } from "@/engine/types";
 export default function Home() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [trainingMode, setTrainingMode] = useState(false);
+  const difficultyCount = Object.keys(DIFFICULTY_CONFIGS).length;
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 relative" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 1rem))",
+        paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+      }}
+    >
       {/* Theme Switcher */}
-      <div className="absolute right-4" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))' }}>
+      <div
+        className="absolute right-4"
+        style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 1rem))" }}
+      >
         <ThemeSwitcher />
       </div>
 
@@ -52,7 +62,9 @@ export default function Home() {
               <Swords className="w-5 h-5 text-primary" />
               Play vs AI
             </CardTitle>
-            <CardDescription>Challenge the computer at 5 difficulty levels</CardDescription>
+            <CardDescription>
+              Challenge the computer at {difficultyCount} difficulty levels
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Difficulty Select */}

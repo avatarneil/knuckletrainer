@@ -10,7 +10,7 @@ export function KeyboardShortcuts() {
   const [isExpanded, setIsExpanded] = useState(false);
 
   return (
-    <div className="fixed bottom-4 right-4 z-40 flex flex-col items-end gap-2">
+    <div className="fixed right-4 top-[max(4.75rem,calc(env(safe-area-inset-top)+4rem))] lg:top-auto lg:bottom-[max(1rem,calc(env(safe-area-inset-bottom)+0.5rem))] z-40 flex flex-col items-end gap-2">
       <Tooltip>
         <TooltipTrigger asChild>
           <Button

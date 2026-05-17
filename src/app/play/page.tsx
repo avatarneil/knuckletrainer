@@ -56,6 +56,8 @@ function PlayContent() {
   const [showGameOver, setShowGameOver] = useState(false);
   const [showResumeDialog, setShowResumeDialog] = useState(false);
   const [showClearHistoryDialog, setShowClearHistoryDialog] = useState(false);
+  const [showMobileTrainingDetails, setShowMobileTrainingDetails] = useState(false);
+  const [liveStatus, setLiveStatus] = useState("");
   const [pendingSavedSession, setPendingSavedSession] =
     useState<ReturnType<typeof gameStorage.loadSession>>(null);
   const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(null);
@@ -252,6 +254,8 @@ function PlayContent() {
   const legalColumns = ALL_COLUMNS.filter((i) => !isColumnFull(currentGrid[i]));
   const canRoll = isRollingPhase && isPlayer1Turn && !isEnded;
   const canPlace = isPlacingPhase && isPlayer1Turn && !isEnded;
+  const shouldShowTrainingAnalysis =
+    game.isTrainingMode && game.state.phase === "placing" && game.state.currentPlayer === "player1";
 
   // Set up keyboard controls
   useKeyboardControls({
@@ -263,6 +267,69 @@ function PlayContent() {
     onPlaceDie: game.placeDie,
     onRoll: game.roll,
   });
+
+  useEffect(() => {
+    if (!shouldShowTrainingAnalysis) {
+      setShowMobileTrainingDetails(false);
+    }
+  }, [shouldShowTrainingAnalysis]);
+
+  useEffect(() => {
+    if (!isReady) {
+      return;
+    }
+
+    const activePlayerName = game.state.currentPlayer === "player1" ? "You" : "AI";
+
+    if (game.state.phase === "ended") {
+      const result =
+        game.state.winner === "draw"
+          ? "Game over. The game ended in a draw."
+          : game.state.winner === "player1"
+            ? "Game over. You won."
+            : "Game over. AI won.";
+      setLiveStatus(result);
+      return;
+    }
+
+    if (game.state.phase === "placing" && game.state.currentDie) {
+      setLiveStatus(
+        `${activePlayerName} rolled ${game.state.currentDie}. ${
+          game.state.currentPlayer === "player1" ? "Choose a legal column." : "AI is choosing."
+        }`
+      );
+      return;
+    }
+
+    if (game.state.phase === "rolling") {
+      setLiveStatus(
+        game.state.currentPlayer === "player1"
+          ? "Your turn. Roll the die."
+          : "AI turn. Waiting for the AI to roll."
+      );
+    }
+  }, [
+    game.state.currentDie,
+    game.state.currentPlayer,
+    game.state.phase,
+    game.state.winner,
+    isReady,
+  ]);
+
+  useEffect(() => {
+    if (!isReady || !shouldShowTrainingAnalysis || !game.moveAnalysis?.length) {
+      return;
+    }
+
+    const bestMove = game.moveAnalysis.reduce((best, move) =>
+      move.winProbability > best.winProbability ? move : best
+    );
+    setLiveStatus(
+      `Analysis ready. Best move is column ${bestMove.column + 1} with ${(
+        bestMove.winProbability * 100
+      ).toFixed(0)} percent win chance.`
+    );
+  }, [game.moveAnalysis, isReady, shouldShowTrainingAnalysis]);
 
   const handleNewGame = useCallback(async () => {
     // Clear old session if it exists and wasn't recorded
@@ -371,8 +438,17 @@ function PlayContent() {
   }
 
   return (
-    <main className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))",
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
+    >
       <InstallPrompt />
+      <p className="sr-only" aria-live="polite" aria-atomic="true">
+        {liveStatus}
+      </p>
       {/* Header */}
       <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">
         <Link href="/">
@@ -463,7 +539,7 @@ function PlayContent() {
       </div>
 
       {/* Game Board with Training Panel */}
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="relative flex-1 flex flex-col min-h-0 overflow-hidden">
         <GameBoard
           state={game.state}
           isRolling={game.isRolling}
@@ -477,6 +553,20 @@ function PlayContent() {
           moveAnalysis={game.moveAnalysis ?? undefined}
           showProbabilities={game.isTrainingMode}
         />
+
+        {shouldShowTrainingAnalysis && (
+          <div className="lg:hidden flex-shrink-0 w-full max-w-[min(95vw,35rem)] mx-auto pb-1">
+            <div className="max-h-[min(12rem,28dvh)] overflow-y-auto px-1">
+              <WinProbability
+                analysis={game.moveAnalysis ?? []}
+                onSelectColumn={(col: ColumnIndex) => game.placeDie(col)}
+                variant="tray"
+                isExpanded={showMobileTrainingDetails}
+                onExpandedChange={setShowMobileTrainingDetails}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Keyboard Shortcuts Widget */}
         <KeyboardShortcuts />

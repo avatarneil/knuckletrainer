@@ -10,6 +10,9 @@ interface ColumnProps {
   columnIndex: ColumnIndex;
   isClickable?: boolean;
   isHighlighted?: boolean;
+  isRecommended?: boolean;
+  recommendationLabel?: string;
+  accessibleLabel?: string;
   winProbability?: number;
   showProbability?: boolean;
   onClick?: () => void;
@@ -23,6 +26,9 @@ export function Column({
   columnIndex,
   isClickable = false,
   isHighlighted = false,
+  isRecommended = false,
+  recommendationLabel,
+  accessibleLabel,
   winProbability,
   showProbability = false,
   onClick,
@@ -31,6 +37,15 @@ export function Column({
   removingIndices = [],
 }: ColumnProps) {
   const score = calculateColumnScore(column, columnIndex);
+  const probabilityCue =
+    recommendationLabel ??
+    (winProbability === undefined
+      ? undefined
+      : winProbability >= 0.5
+        ? "Good"
+        : winProbability >= 0.3
+          ? "Watch"
+          : "Risk");
 
   // For opponent, reverse the visual order (their row 0 is at bottom from our view)
   const displayColumn = isOpponent ? [...column].toReversed() : column;
@@ -41,10 +56,14 @@ export function Column({
       type="button"
       onClick={isClickable ? onClick : undefined}
       disabled={!isClickable}
+      aria-label={accessibleLabel}
+      aria-disabled={!isClickable}
       className={cn(
-        "flex flex-col gap-[clamp(0.25rem,1vmin,0.75rem)] p-[clamp(0.25rem,1.5vmin,0.75rem)] rounded-lg sm:rounded-xl transition-colors duration-200",
-        isClickable && "cursor-pointer hover:bg-muted/50 hover:scale-105 hover:transition-transform",
+        "flex flex-col gap-[clamp(0.25rem,1vmin,0.75rem)] p-[clamp(0.25rem,1.5vmin,0.75rem)] min-w-[clamp(3rem,9vmin,5.5rem)] rounded-lg sm:rounded-xl transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        isClickable &&
+          "cursor-pointer hover:bg-muted/50 hover:scale-105 hover:transition-transform",
         isHighlighted && "ring-2 ring-accent animate-pulse-glow",
+        isRecommended && "ring-2 ring-accent bg-accent/10",
         !isClickable && "cursor-default"
       )}
     >
@@ -78,15 +97,18 @@ export function Column({
       {showProbability && winProbability !== undefined && (
         <div
           className={cn(
-            "text-center text-[clamp(0.625rem,1.5vw,0.75rem)] font-medium rounded-full px-[clamp(0.375rem,1vw,0.5rem)] py-[clamp(0.125rem,0.5vw,0.25rem)] transition-colors",
-            winProbability > 0.5
-              ? "bg-green-500/20 text-green-400"
-              : winProbability > 0.3
-                ? "bg-yellow-500/20 text-yellow-400"
-                : "bg-red-500/20 text-red-400"
+            "text-center text-[clamp(0.625rem,1.5vw,0.75rem)] font-medium rounded-lg px-[clamp(0.375rem,1vw,0.5rem)] py-[clamp(0.125rem,0.5vw,0.25rem)] transition-colors border leading-tight",
+            isRecommended
+              ? "bg-accent/20 text-accent border-accent/50"
+              : winProbability >= 0.5
+                ? "bg-green-500/20 text-green-300 border-green-500/40"
+                : winProbability >= 0.3
+                  ? "bg-yellow-500/20 text-yellow-200 border-yellow-500/40"
+                  : "bg-red-500/20 text-red-300 border-red-500/40"
           )}
         >
-          {(winProbability * 100).toFixed(0)}%
+          <span className="block">{(winProbability * 100).toFixed(0)}%</span>
+          {probabilityCue && <span className="block text-[0.625rem]">{probabilityCue}</span>}
         </div>
       )}
     </button>

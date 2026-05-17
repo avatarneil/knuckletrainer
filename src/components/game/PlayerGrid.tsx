@@ -1,7 +1,7 @@
 "use client";
 
 import { Loader2 } from "lucide-react";
-import { calculateGridScore } from "@/engine/scorer";
+import { calculateColumnScore, calculateGridScore } from "@/engine/scorer";
 import type { ColumnIndex, Grid, MoveAnalysis } from "@/engine/types";
 import { ALL_COLUMNS } from "@/engine/types";
 import { cn } from "@/lib/utils";
@@ -41,13 +41,21 @@ export function PlayerGrid({
   isThinking = false,
 }: PlayerGridProps) {
   const score = calculateGridScore(grid);
+  const rankedAnalysis = moveAnalysis
+    ? moveAnalysis.toSorted((a, b) => b.winProbability - a.winProbability)
+    : [];
+  const bestColumn = rankedAnalysis[0]?.column;
 
-  const getWinProbability = (column: ColumnIndex): number | undefined => {
+  const getMoveAnalysis = (column: ColumnIndex): MoveAnalysis | undefined => {
     if (!moveAnalysis) {
       return undefined;
     }
-    const analysis = moveAnalysis.find((m) => m.column === column);
-    return analysis?.winProbability;
+    return moveAnalysis.find((m) => m.column === column);
+  };
+
+  const getRecommendationRank = (column: ColumnIndex): number | undefined => {
+    const index = rankedAnalysis.findIndex((m) => m.column === column);
+    return index >= 0 ? index + 1 : undefined;
   };
 
   const getRemovingIndices = (column: ColumnIndex): number[] => {
@@ -55,8 +63,36 @@ export function PlayerGrid({
     return removing?.indices ?? [];
   };
 
+  const getColumnLabel = (column: ColumnIndex): string => {
+    const columnScore = calculateColumnScore(grid[column], column);
+    const isLegal = canPlaceDie && legalColumns.includes(column);
+    const isFull = grid[column].every((die) => die !== null);
+    const analysis = getMoveAnalysis(column);
+    const rank = getRecommendationRank(column);
+    const parts = [
+      `${playerName} column ${column + 1}`,
+      `score ${columnScore.total}`,
+      isLegal ? "legal move" : isFull ? "full column" : "disabled this turn",
+    ];
+
+    if (analysis && rank !== undefined) {
+      const probability = (analysis.winProbability * 100).toFixed(0);
+      parts.push(
+        rank === 1 ? "training recommendation: best move" : `training recommendation rank ${rank}`,
+        `${probability} percent win chance`,
+        `immediate score gain ${analysis.immediateScoreGain}`
+      );
+      if (analysis.opponentDiceRemoved > 0) {
+        parts.push(`removes ${analysis.opponentDiceRemoved} opponent dice`);
+      }
+    }
+
+    return parts.join(", ");
+  };
+
   return (
-    <div
+    <section
+      aria-label={`${playerName} grid, total score ${score.total}`}
       className={cn(
         "flex flex-col items-center gap-[clamp(0.125rem,1vmin,0.5rem)] p-[clamp(0.25rem,1.5vmin,1rem)] rounded-xl sm:rounded-2xl transition-colors duration-300 min-h-0 flex-shrink",
         isCurrentPlayer && !isOpponent && "ring-2 ring-accent/50 bg-accent/5"
@@ -95,9 +131,18 @@ export function PlayerGrid({
             columnIndex={colIndex}
             isClickable={canPlaceDie && legalColumns.includes(colIndex)}
             isHighlighted={highlightedColumn === colIndex}
+            isRecommended={bestColumn === colIndex}
+            recommendationLabel={
+              bestColumn === colIndex
+                ? "Best"
+                : getRecommendationRank(colIndex) !== undefined
+                  ? `Rank ${getRecommendationRank(colIndex)}`
+                  : undefined
+            }
+            accessibleLabel={getColumnLabel(colIndex)}
             onClick={() => onColumnClick?.(colIndex)}
             isOpponent={isOpponent}
-            winProbability={getWinProbability(colIndex)}
+            winProbability={getMoveAnalysis(colIndex)?.winProbability}
             showProbability={showProbabilities && legalColumns.includes(colIndex)}
             newDieIndex={newDieColumn === colIndex ? (newDieRow ?? undefined) : undefined}
             removingIndices={getRemovingIndices(colIndex)}
@@ -116,6 +161,6 @@ export function PlayerGrid({
           </div>
         ))}
       </div>
-    </div>
+    </section>
   );
 }

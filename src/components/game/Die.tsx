@@ -71,6 +71,8 @@ export function Die({
 }: DieProps) {
   return (
     <div
+      role="img"
+      aria-label={`Die showing ${value}`}
       className={cn(
         "relative rounded-lg bg-gradient-to-br flex items-center justify-center font-bold shadow-lg transition-all duration-300",
         sizeClasses[size],
@@ -117,6 +119,8 @@ export function DieSlot({ value, size = "md", isNew, isRemoving }: DieSlotProps)
   if (value == null) {
     return (
       <div
+        role="img"
+        aria-label="Empty die slot"
         className={cn(
           "rounded-lg border-2 border-dashed border-muted-foreground/20 bg-muted/30",
           sizeClasses[size]

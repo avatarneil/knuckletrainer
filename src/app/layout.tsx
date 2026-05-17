@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ServiceWorkerRegistration } from "@/components/pwa";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { DIFFICULTY_CONFIGS } from "@/engine/ai/difficulty";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,14 +17,15 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
 });
 
+const difficultyCount = Object.keys(DIFFICULTY_CONFIGS).length;
+
 export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "black-translucent",
     title: "KnuckleTrainer",
   },
-  description:
-    "Master Knucklebones, the dice game from Cult of the Lamb. Train against AI opponents with 5 difficulty levels and win probability analysis.",
+  description: `Master Knucklebones, the dice game from Cult of the Lamb. Train against AI opponents with ${difficultyCount} difficulty levels and win probability analysis.`,
   formatDetection: {
     telephone: false,
   },
