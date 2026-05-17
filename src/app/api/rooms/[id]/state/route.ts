@@ -13,6 +13,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     // Get player token from header
     const playerToken = request.headers.get("x-player-token");
+    const watcherToken = request.headers.get("x-watcher-token");
 
     // Get the room
     const room = await getRoom(roomId);
@@ -22,7 +23,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
     }
 
     // Get public state
-    const publicState = getPublicRoomState(room);
+    const publicState = getPublicRoomState(room, watcherToken);
 
     // If player token provided, include their role
     let role;
@@ -48,7 +49,6 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
       isMyTurn,
       opponentDisconnected,
       isWaitingForOpponent: room.player1 === null || room.player2 === null,
-      followedBy: room.followedBy || [],
     });
   } catch (error) {
     console.error("Error getting room state:", error);

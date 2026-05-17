@@ -36,8 +36,10 @@ export async function POST(request: Request) {
         name: playerName,
       },
       player2: null,
+      previousRoomId: null,
       rematchRequested: null,
       state: createInitialState(),
+      successorRoomId: null,
       watchers: [],
     };
 

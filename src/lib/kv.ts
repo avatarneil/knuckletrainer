@@ -27,6 +27,8 @@ export interface GameRoom {
   gameType: "multiplayer" | "ai";
   watchers?: string[]; // Array of watcher tokens
   followedBy?: string[]; // Array of watcher tokens who want to follow to next match
+  previousRoomId?: string | null;
+  successorRoomId?: string | null;
 }
 
 /** Player session stored in KV (maps token to room) */
@@ -135,16 +137,22 @@ export function isRoomReady(room: GameRoom): boolean {
 /**
  * Get public room state (without player tokens)
  */
-export function getPublicRoomState(room: GameRoom) {
+export function getPublicRoomState(room: GameRoom, watcherToken?: string | null) {
   return {
+    followerCount: room.followedBy?.length ?? 0,
     gameType: room.gameType,
+    isFollowedByCurrentWatcher: watcherToken
+      ? (room.followedBy?.includes(watcherToken) ?? false)
+      : false,
     isPublic: room.isPublic,
     lastActivity: room.lastActivity,
     player1: room.player1 ? { name: room.player1.name } : null,
     player2: room.player2 ? { name: room.player2.name } : null,
+    previousRoomId: room.previousRoomId ?? null,
     rematchRequested: room.rematchRequested,
     roomId: room.id,
     state: room.state,
+    successorRoomId: room.successorRoomId ?? null,
     watcherCount: room.watchers?.length ?? 0,
   };
 }

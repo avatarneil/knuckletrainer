@@ -45,6 +45,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     } else if (action === "unfollow") {
       // Remove from followers
       room.followedBy = room.followedBy.filter((t) => t !== watcherToken);
+    } else {
+      return NextResponse.json({ error: "Invalid follow action", success: false }, { status: 400 });
     }
 
     // Save room
@@ -52,6 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     return NextResponse.json({
       followerCount: room.followedBy.length,
+      isFollowing: room.followedBy.includes(watcherToken),
       success: true,
       watcherToken,
     });
