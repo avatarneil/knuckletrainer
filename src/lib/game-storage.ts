@@ -6,6 +6,7 @@
  */
 
 import type { DifficultyLevel, GameState, Player } from "@/engine/types";
+import type { PostGameCoachBrief } from "@/engine/post-game-coach";
 
 // ============================================================================
 // Types
@@ -52,6 +53,8 @@ export interface GameHistoryEntry {
   endedAt: number;
   /** Total number of turns */
   turnCount: number;
+  /** Optional post-game coach summary for later review */
+  coach?: PostGameCoachBrief;
 }
 
 /** Storage adapter interface for future extensibility */

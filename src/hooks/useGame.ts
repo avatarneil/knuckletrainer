@@ -20,7 +20,7 @@ interface UseGameOptions {
   /** Initial state to resume from */
   initialState?: GameState;
   /** Callback when game ends */
-  onGameEnd?: (winner: "player1" | "player2" | "draw") => void;
+  onGameEnd?: (winner: "player1" | "player2" | "draw", finalState: GameState) => void;
   /** Callback when state changes (for auto-save) */
   onStateChange?: (state: GameState) => void;
 }
@@ -169,7 +169,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
                 if (result.newState.phase !== "ended") {
                   handleAITurn(result.newState);
                 } else if (result.newState.winner) {
-                  onGameEndRef.current?.(result.newState.winner);
+                  onGameEndRef.current?.(result.newState.winner, result.newState);
                 }
               } else {
                 isProcessingAITurn.current = false;
@@ -194,7 +194,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
               if (result.newState.phase !== "ended") {
                 handleAITurn(result.newState);
               } else if (result.newState.winner) {
-                onGameEndRef.current?.(result.newState.winner);
+                onGameEndRef.current?.(result.newState.winner, result.newState);
               }
             } else {
               isProcessingAITurn.current = false;
@@ -285,7 +285,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
       setMoveAnalysis(null);
 
       if (result.newState.phase === "ended" && result.newState.winner) {
-        onGameEndRef.current?.(result.newState.winner);
+        onGameEndRef.current?.(result.newState.winner, result.newState);
       } else {
         // Trigger AI turn if applicable (for AI mode or AI vs AI mode)
         handleAITurn(result.newState);

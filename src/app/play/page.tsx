@@ -2,15 +2,19 @@
 
 import {
   ArrowLeft,
+  CheckCircle2,
   Eye,
   EyeOff,
   GraduationCap,
   History,
+  Lightbulb,
+  ListRestart,
   Play,
   RotateCcw,
   Settings,
   Trash2,
   Trophy,
+  XCircle,
 } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -37,7 +41,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { DIFFICULTY_CONFIGS, createInitialState } from "@/engine";
+import {
+  DIFFICULTY_CONFIGS,
+  applyMove,
+  buildPostGameCoachBrief,
+  createInitialState,
+  type PostGameCoachBrief,
+  type PostGameCoachMoment,
+} from "@/engine";
 import { isColumnFull } from "@/engine/scorer";
 import type { ColumnIndex, DifficultyLevel, GameState } from "@/engine/types";
 import { ALL_COLUMNS } from "@/engine/types";
@@ -46,6 +57,24 @@ import { useGameHistory } from "@/hooks/useGameHistory";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
 import { getApiBaseUrl } from "@/lib/api";
 import { gameStorage } from "@/lib/game-storage";
+
+type CoachReviewState = {
+  mode: "inspect" | "retry";
+  moment: PostGameCoachMoment;
+  selectedColumn: ColumnIndex | null;
+};
+
+function formatColumn(column: ColumnIndex): string {
+  return `Column ${column + 1}`;
+}
+
+function formatWinProbability(value: number): string {
+  return `${Math.round(value * 100)}%`;
+}
+
+function formatWinDelta(value: number): string {
+  return `${Math.round(value * 100)} pts`;
+}
 
 function PlayContent() {
   const searchParams = useSearchParams();
@@ -60,6 +89,8 @@ function PlayContent() {
     useState<ReturnType<typeof gameStorage.loadSession>>(null);
   const [lastWinner, setLastWinner] = useState<"player1" | "player2" | "draw" | null>(null);
   const [isPublicMatch, setIsPublicMatch] = useState(false);
+  const [coachBrief, setCoachBrief] = useState<PostGameCoachBrief | null>(null);
+  const [coachReview, setCoachReview] = useState<CoachReviewState | null>(null);
   const publicRoomIdRef = useRef<string | null>(null);
 
   // Game history hook for persistence
@@ -70,6 +101,10 @@ function PlayContent() {
   const hasCheckedResume = useRef(false);
   // Track current state for callbacks
   const latestStateRef = useRef<GameState | null>(null);
+  const latestSettingsRef = useRef({
+    difficulty: initialDifficulty,
+    trainingMode: initialTraining,
+  });
 
   // Game state - may be initialized from saved session
   const [gameInitialState, setGameInitialState] = useState<GameState | undefined>(undefined);
@@ -146,6 +181,9 @@ function PlayContent() {
 
   const startNewSession = useCallback(async () => {
     const newState = createInitialState();
+    setCoachBrief(null);
+    setCoachReview(null);
+    setLastWinner(null);
     const sessionId = gameHistory.startSession({
       difficulty: gameDifficulty,
       initialState: newState,
@@ -222,13 +260,23 @@ function PlayContent() {
   );
 
   const handleGameEnd = useCallback(
-    (winner: "player1" | "player2" | "draw") => {
+    (winner: "player1" | "player2" | "draw", finalState: GameState) => {
       setLastWinner(winner);
       setShowGameOver(true);
+      latestStateRef.current = finalState;
+      setCoachReview(null);
+
+      const settings = latestSettingsRef.current;
+      const brief = buildPostGameCoachBrief(finalState, {
+        difficulty: settings.difficulty,
+        mode: "ai",
+        trainingMode: settings.trainingMode,
+      });
+      setCoachBrief(brief);
 
       // Record to history using the latest state ref
-      if (sessionIdRef.current && latestStateRef.current) {
-        gameHistory.recordGameEnd(sessionIdRef.current, latestStateRef.current, winner);
+      if (sessionIdRef.current) {
+        gameHistory.recordGameEnd(sessionIdRef.current, finalState, winner, brief);
       }
     },
     [gameHistory]
@@ -242,6 +290,39 @@ function PlayContent() {
     onStateChange: handleStateChange,
     trainingMode: gameTrainingMode,
   });
+
+  useEffect(() => {
+    latestSettingsRef.current = {
+      difficulty: game.difficulty,
+      trainingMode: game.isTrainingMode,
+    };
+  }, [game.difficulty, game.isTrainingMode]);
+
+  const handleDifficultyChange = useCallback(
+    (level: DifficultyLevel) => {
+      setGameDifficulty(level);
+      latestSettingsRef.current = {
+        ...latestSettingsRef.current,
+        difficulty: level,
+      };
+      game.setDifficulty(level);
+    },
+    [game]
+  );
+
+  const handleTrainingModeChange = useCallback(
+    (trainingMode: boolean) => {
+      setGameTrainingMode(trainingMode);
+      latestSettingsRef.current = {
+        ...latestSettingsRef.current,
+        trainingMode,
+      };
+      if (trainingMode !== game.isTrainingMode) {
+        game.toggleTrainingMode();
+      }
+    },
+    [game]
+  );
 
   // Calculate legal columns and game state for keyboard controls
   const isPlayer1Turn = game.state.currentPlayer === "player1";
@@ -257,7 +338,7 @@ function PlayContent() {
   useKeyboardControls({
     canPlace,
     canRoll,
-    enabled: isReady,
+    enabled: isReady && !coachReview,
     gameState: game.state,
     legalColumns,
     onPlaceDie: game.placeDie,
@@ -274,6 +355,8 @@ function PlayContent() {
     game.resetGame();
     setShowGameOver(false);
     setLastWinner(null);
+    setCoachBrief(null);
+    setCoachReview(null);
 
     // Start new session
     const newState = createInitialState();
@@ -284,6 +367,10 @@ function PlayContent() {
       trainingMode: game.isTrainingMode,
     });
     sessionIdRef.current = sessionId;
+    latestStateRef.current = newState;
+    setGameDifficulty(game.difficulty);
+    setGameTrainingMode(game.isTrainingMode);
+    setGameInitialState(newState);
 
     // If public match is enabled, create a new room (followers will auto-join)
     if (isPublicMatch) {
@@ -291,6 +378,46 @@ function PlayContent() {
       await updatePublicRoom(newState);
     }
   }, [game, gameHistory, isPublicMatch, updatePublicRoom]);
+
+  const handleInspectCoachMoment = useCallback(() => {
+    const moment = coachBrief?.moments[0];
+    if (!moment) {
+      return;
+    }
+    setCoachReview({ mode: "inspect", moment, selectedColumn: null });
+    setShowGameOver(false);
+  }, [coachBrief]);
+
+  const handleRetryCoachMoment = useCallback(() => {
+    const moment = coachBrief?.moments[0];
+    if (!moment) {
+      return;
+    }
+    setCoachReview({ mode: "retry", moment, selectedColumn: null });
+    setShowGameOver(false);
+  }, [coachBrief]);
+
+  const handleRetryColumn = useCallback((column: ColumnIndex) => {
+    setCoachReview((current) => {
+      if (!current || current.mode !== "retry" || current.selectedColumn !== null) {
+        return current;
+      }
+
+      const result = applyMove(current.moment.stateBeforeMove, column);
+      if (!result) {
+        return current;
+      }
+
+      return {
+        ...current,
+        selectedColumn: column,
+      };
+    });
+  }, []);
+
+  const handleExitCoachReview = useCallback(() => {
+    setCoachReview(null);
+  }, []);
 
   // Format time for display
   const formatTimeSince = (timestamp: number): string => {
@@ -370,8 +497,33 @@ function PlayContent() {
     );
   }
 
+  const primaryCoachMoment = coachBrief?.moments[0] ?? null;
+  const isRetryAwaitingChoice =
+    coachReview?.mode === "retry" && coachReview.selectedColumn === null;
+  const retryMatchedRecommendation =
+    coachReview?.selectedColumn != null &&
+    coachReview.selectedColumn === coachReview.moment.recommendedColumn;
+  const shouldRevealCoachRecommendation =
+    coachReview?.mode === "inspect" || coachReview?.selectedColumn != null;
+  const boardState = coachReview ? coachReview.moment.stateBeforeMove : game.state;
+  const boardMoveAnalysis = coachReview
+    ? shouldRevealCoachRecommendation
+      ? coachReview.moment.analysis
+      : undefined
+    : (game.moveAnalysis ?? undefined);
+  const boardHighlightedColumn =
+    coachReview && shouldRevealCoachRecommendation
+      ? coachReview.moment.recommendedColumn
+      : undefined;
+
   return (
-    <main className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 0.5rem))', paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="h-[100dvh] flex flex-col p-[clamp(0.5rem,2vw,1.5rem)] overflow-hidden"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 0.5rem))",
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+      }}
+    >
       <InstallPrompt />
       {/* Header */}
       <header className="flex items-center justify-between mb-[clamp(0.5rem,1.5vw,1rem)] flex-shrink-0">
@@ -424,7 +576,7 @@ function PlayContent() {
             <Switch
               id="training-toggle"
               checked={game.isTrainingMode}
-              onCheckedChange={game.toggleTrainingMode}
+              onCheckedChange={handleTrainingModeChange}
             />
           </div>
 
@@ -464,25 +616,92 @@ function PlayContent() {
 
       {/* Game Board with Training Panel */}
       <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+        {coachReview && (
+          <div className="mx-auto mb-2 w-full max-w-[min(95vw,56rem)] flex-shrink-0 rounded-lg border border-accent/30 bg-card/80 px-3 py-2 text-sm">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-start gap-2">
+                {coachReview.mode === "retry" && coachReview.selectedColumn != null ? (
+                  retryMatchedRecommendation ? (
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 text-green-400" />
+                  ) : (
+                    <XCircle className="mt-0.5 h-4 w-4 text-yellow-400" />
+                  )
+                ) : (
+                  <Lightbulb className="mt-0.5 h-4 w-4 text-accent" />
+                )}
+                <div>
+                  <div className="font-medium">
+                    {coachReview.mode === "retry"
+                      ? coachReview.selectedColumn == null
+                        ? "Retry the turning point"
+                        : retryMatchedRecommendation
+                          ? "That matched the coach move"
+                          : "Coach move revealed"
+                      : "Inspecting the turning point"}
+                  </div>
+                  <div className="text-muted-foreground">
+                    Turn {coachReview.moment.turnNumber}, die {coachReview.moment.dieValue}:{" "}
+                    {coachReview.mode === "retry" && coachReview.selectedColumn == null
+                      ? "choose one column to practice the decision."
+                      : `${formatColumn(coachReview.moment.recommendedColumn)} was stronger than ${formatColumn(coachReview.moment.chosenColumn)}.`}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                {coachReview.mode === "inspect" && (
+                  <Button variant="outline" size="sm" onClick={handleRetryCoachMoment}>
+                    <ListRestart className="mr-2 h-4 w-4" />
+                    Retry
+                  </Button>
+                )}
+                {coachReview.mode === "retry" && coachReview.selectedColumn != null && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      setCoachReview({
+                        mode: "retry",
+                        moment: coachReview.moment,
+                        selectedColumn: null,
+                      })
+                    }
+                  >
+                    <ListRestart className="mr-2 h-4 w-4" />
+                    Again
+                  </Button>
+                )}
+                <Button variant="ghost" size="sm" onClick={handleExitCoachReview}>
+                  Exit
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
         <GameBoard
-          state={game.state}
-          isRolling={game.isRolling}
-          isThinking={game.isThinking}
-          onRoll={game.roll}
-          onColumnClick={game.placeDie}
+          state={boardState}
+          isRolling={coachReview ? false : game.isRolling}
+          isThinking={coachReview ? false : game.isThinking}
+          onRoll={coachReview ? undefined : game.roll}
+          onColumnClick={
+            isRetryAwaitingChoice ? handleRetryColumn : coachReview ? undefined : game.placeDie
+          }
           player1Name="You"
           player2Name="AI"
-          isPlayer1Human
+          isPlayer1Human={!coachReview || isRetryAwaitingChoice}
           isPlayer2Human={false}
-          moveAnalysis={game.moveAnalysis ?? undefined}
-          showProbabilities={game.isTrainingMode}
+          moveAnalysis={boardMoveAnalysis}
+          showProbabilities={coachReview ? shouldRevealCoachRecommendation : game.isTrainingMode}
+          highlightedColumn={boardHighlightedColumn}
         />
 
         {/* Keyboard Shortcuts Widget */}
-        <KeyboardShortcuts />
+        {!coachReview && <KeyboardShortcuts />}
 
         {/* Training Mode Panel - shown below on mobile, would need different layout for desktop */}
-        {game.isTrainingMode &&
+        {!coachReview &&
+          game.isTrainingMode &&
           game.state.phase === "placing" &&
           game.state.currentPlayer === "player1" && (
             <div className="hidden lg:absolute lg:right-4 lg:top-1/2 lg:-translate-y-1/2 lg:block w-72">
@@ -507,7 +726,7 @@ function PlayContent() {
               <Label>AI Difficulty</Label>
               <Select
                 value={game.difficulty}
-                onValueChange={(v) => game.setDifficulty(v as DifficultyLevel)}
+                onValueChange={(v) => handleDifficultyChange(v as DifficultyLevel)}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -551,7 +770,7 @@ function PlayContent() {
               <Switch
                 id="settings-training"
                 checked={game.isTrainingMode}
-                onCheckedChange={game.toggleTrainingMode}
+                onCheckedChange={handleTrainingModeChange}
               />
             </div>
 
@@ -587,7 +806,7 @@ function PlayContent() {
 
       {/* Game Over Dialog */}
       <Dialog open={showGameOver} onOpenChange={setShowGameOver}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Trophy className="w-5 h-5 text-accent" />
@@ -602,11 +821,85 @@ function PlayContent() {
             </DialogDescription>
           </DialogHeader>
 
-          <DialogFooter className="flex gap-2">
+          {coachBrief && primaryCoachMoment && (
+            <div className="space-y-3 rounded-lg border border-accent/30 bg-card/80 p-3">
+              <div className="flex gap-2">
+                <Lightbulb className="mt-0.5 h-4 w-4 flex-shrink-0 text-accent" />
+                <div>
+                  <div className="text-sm font-medium">Coach takeaway</div>
+                  <p className="text-sm text-muted-foreground">{coachBrief.summary}</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                <div>
+                  <div className="text-muted-foreground">Final</div>
+                  <div className="font-mono font-medium">
+                    {coachBrief.finalScore.player1}-{coachBrief.finalScore.player2}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Difficulty</div>
+                  <div className="font-medium">
+                    {DIFFICULTY_CONFIGS[coachBrief.difficulty].name}
+                  </div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Turns</div>
+                  <div className="font-mono font-medium">{coachBrief.turnCount}</div>
+                </div>
+                <div>
+                  <div className="text-muted-foreground">Training</div>
+                  <div className="font-medium">{coachBrief.trainingMode ? "On" : "Off"}</div>
+                </div>
+              </div>
+
+              <div className="grid gap-2 text-sm sm:grid-cols-2">
+                <div className="rounded-md bg-muted/30 p-2">
+                  <div className="text-xs text-muted-foreground">Your move</div>
+                  <div className="font-medium">
+                    {formatColumn(primaryCoachMoment.chosenColumn)} at{" "}
+                    {formatWinProbability(primaryCoachMoment.chosenMove.winProbability)}
+                  </div>
+                </div>
+                <div className="rounded-md bg-accent/15 p-2">
+                  <div className="text-xs text-muted-foreground">Coach move</div>
+                  <div className="font-medium">
+                    {formatColumn(primaryCoachMoment.recommendedColumn)} at{" "}
+                    {formatWinProbability(primaryCoachMoment.recommendedMove.winProbability)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-xs text-muted-foreground">
+                Win projection +{formatWinDelta(primaryCoachMoment.winProbabilityDelta)}
+                {primaryCoachMoment.scoreSwingDelta > 0
+                  ? `, score swing +${primaryCoachMoment.scoreSwingDelta.toFixed(1)}`
+                  : ""}
+                {primaryCoachMoment.missedDiceRemoved > 0
+                  ? `, ${primaryCoachMoment.missedDiceRemoved} missed removal${primaryCoachMoment.missedDiceRemoved === 1 ? "" : "s"}`
+                  : ""}
+              </div>
+            </div>
+          )}
+
+          <DialogFooter className="flex flex-wrap gap-2 sm:justify-end">
             <Button variant="outline" onClick={() => setShowGameOver(false)}>
               View Board
             </Button>
-            <Button onClick={handleNewGame}>
+            {primaryCoachMoment && (
+              <Button variant="outline" onClick={handleInspectCoachMoment}>
+                <Eye className="mr-2 h-4 w-4" />
+                Inspect
+              </Button>
+            )}
+            {primaryCoachMoment && (
+              <Button onClick={handleRetryCoachMoment}>
+                <ListRestart className="mr-2 h-4 w-4" />
+                Retry
+              </Button>
+            )}
+            <Button variant={primaryCoachMoment ? "outline" : "default"} onClick={handleNewGame}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Play Again
             </Button>
