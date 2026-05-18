@@ -10,6 +10,7 @@ import {
   rollDie,
 } from "@/engine";
 import type { ColumnIndex, DifficultyLevel, GameState, MoveAnalysis } from "@/engine/types";
+import type { ReviewCandidateInput } from "@/lib/review-queue";
 
 interface UseGameOptions {
   mode: "ai" | "pvp" | "training" | "ai-vs-ai";
@@ -23,6 +24,8 @@ interface UseGameOptions {
   onGameEnd?: (winner: "player1" | "player2" | "draw") => void;
   /** Callback when state changes (for auto-save) */
   onStateChange?: (state: GameState) => void;
+  /** Callback when a human move can be evaluated for review practice */
+  onReviewCandidate?: (candidate: ReviewCandidateInput) => void;
 }
 
 interface UseGameReturn {
@@ -64,11 +67,13 @@ export function useGame(options: UseGameOptions): UseGameReturn {
   // Store callbacks in refs to avoid infinite loops
   const onStateChangeRef = useRef(options.onStateChange);
   const onGameEndRef = useRef(options.onGameEnd);
+  const onReviewCandidateRef = useRef(options.onReviewCandidate);
 
   // Keep refs up to date
   useEffect(() => {
     onStateChangeRef.current = options.onStateChange;
     onGameEndRef.current = options.onGameEnd;
+    onReviewCandidateRef.current = options.onReviewCandidate;
   });
 
   // Call onStateChange when state updates (skip initial mount)
@@ -281,6 +286,18 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         return;
       }
 
+      if (options.mode === "ai" && state.currentPlayer === "player1") {
+        try {
+          onReviewCandidateRef.current?.({
+            analysis: moveAnalysis,
+            chosenColumn: column,
+            state,
+          });
+        } catch (error) {
+          console.error("Failed to capture review candidate:", error);
+        }
+      }
+
       setState(result.newState);
       setMoveAnalysis(null);
 
@@ -291,7 +308,7 @@ export function useGame(options: UseGameOptions): UseGameReturn {
         handleAITurn(result.newState);
       }
     },
-    [state, handleAITurn]
+    [state, handleAITurn, moveAnalysis, options.mode]
   );
 
   const resetGame = useCallback(() => {

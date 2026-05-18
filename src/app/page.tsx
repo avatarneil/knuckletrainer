@@ -1,6 +1,16 @@
 "use client";
 
-import { Bot, Dices, Eye, GraduationCap, Sparkles, Swords, TrendingUp, Users } from "lucide-react";
+import {
+  Bot,
+  Dices,
+  Eye,
+  GraduationCap,
+  History,
+  Sparkles,
+  Swords,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -17,15 +27,26 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { DIFFICULTY_CONFIGS } from "@/engine";
 import type { DifficultyLevel } from "@/engine/types";
+import { useReviewQueue } from "@/hooks/useReviewQueue";
 
 export default function Home() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [trainingMode, setTrainingMode] = useState(false);
+  const reviewQueue = useReviewQueue();
 
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 relative" style={{ paddingTop: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))', paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
+    <main
+      className="min-h-screen flex flex-col items-center justify-center p-8 relative"
+      style={{
+        paddingTop: "max(1rem, calc(env(safe-area-inset-top) + 1rem))",
+        paddingBottom: "max(1rem, env(safe-area-inset-bottom))",
+      }}
+    >
       {/* Theme Switcher */}
-      <div className="absolute right-4" style={{ top: 'max(1rem, calc(env(safe-area-inset-top) + 1rem))' }}>
+      <div
+        className="absolute right-4"
+        style={{ top: "max(1rem, calc(env(safe-area-inset-top) + 1rem))" }}
+      >
         <ThemeSwitcher />
       </div>
 
@@ -97,6 +118,45 @@ export default function Home() {
               <Button className="w-full" size="lg">
                 <Sparkles className="mr-2 h-4 w-4" />
                 Start Game
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Review Queue */}
+        <Card className="relative overflow-hidden group hover:border-accent/50 transition-all duration-300">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="w-5 h-5 text-accent" />
+              Review Queue
+            </CardTitle>
+            <CardDescription>
+              {reviewQueue.unresolvedCount > 0
+                ? `${reviewQueue.unresolvedCount} saved drill${reviewQueue.unresolvedCount === 1 ? "" : "s"} ready`
+                : "Revisit missed decisions from training games"}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              <div className="rounded-lg bg-muted/30 p-3">
+                <div className="font-mono text-lg font-bold text-accent">
+                  {reviewQueue.unresolvedCount}
+                </div>
+                <div className="text-xs text-muted-foreground">Unresolved</div>
+              </div>
+              <div className="rounded-lg bg-muted/30 p-3">
+                <div className="font-mono text-lg font-bold text-green-400">
+                  {reviewQueue.masteredCount}
+                </div>
+                <div className="text-xs text-muted-foreground">Mastered</div>
+              </div>
+            </div>
+
+            <Link href="/review" className="block">
+              <Button variant="accent" className="w-full" size="lg">
+                <History className="mr-2 h-4 w-4" />
+                Open Review
               </Button>
             </Link>
           </CardContent>
