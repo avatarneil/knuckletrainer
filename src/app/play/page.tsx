@@ -498,11 +498,17 @@ function PlayContent() {
   }
 
   const primaryCoachMoment = coachBrief?.moments[0] ?? null;
+  const didPlayerWin = lastWinner === "player1";
+  const shouldPromptCoachRetry = primaryCoachMoment && !didPlayerWin;
   const isRetryAwaitingChoice =
     coachReview?.mode === "retry" && coachReview.selectedColumn === null;
   const retryMatchedRecommendation =
     coachReview?.selectedColumn != null &&
     coachReview.selectedColumn === coachReview.moment.recommendedColumn;
+  const shouldOfferRetryAgain =
+    coachReview?.mode === "retry" &&
+    coachReview.selectedColumn !== null &&
+    !retryMatchedRecommendation;
   const shouldRevealCoachRecommendation =
     coachReview?.mode === "inspect" || coachReview?.selectedColumn != null;
   const boardState = coachReview ? coachReview.moment.stateBeforeMove : game.state;
@@ -635,7 +641,7 @@ function PlayContent() {
                       ? coachReview.selectedColumn == null
                         ? "Retry the turning point"
                         : retryMatchedRecommendation
-                          ? "That matched the coach move"
+                          ? "You found the coach move"
                           : "Coach move revealed"
                       : "Inspecting the turning point"}
                   </div>
@@ -643,19 +649,21 @@ function PlayContent() {
                     Turn {coachReview.moment.turnNumber}, die {coachReview.moment.dieValue}:{" "}
                     {coachReview.mode === "retry" && coachReview.selectedColumn == null
                       ? "choose one column to practice the decision."
-                      : `${formatColumn(coachReview.moment.recommendedColumn)} was stronger than ${formatColumn(coachReview.moment.chosenColumn)}.`}
+                      : retryMatchedRecommendation
+                        ? "that is the move the coach wanted you to see."
+                        : `${formatColumn(coachReview.moment.recommendedColumn)} was stronger than ${formatColumn(coachReview.moment.chosenColumn)}.`}
                   </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-2 self-end sm:self-auto">
-                {coachReview.mode === "inspect" && (
+                {coachReview.mode === "inspect" && !didPlayerWin && (
                   <Button variant="outline" size="sm" onClick={handleRetryCoachMoment}>
                     <ListRestart className="mr-2 h-4 w-4" />
                     Retry
                   </Button>
                 )}
-                {coachReview.mode === "retry" && coachReview.selectedColumn != null && (
+                {shouldOfferRetryAgain && (
                   <Button
                     variant="outline"
                     size="sm"
@@ -668,7 +676,13 @@ function PlayContent() {
                     }
                   >
                     <ListRestart className="mr-2 h-4 w-4" />
-                    Again
+                    Try Again
+                  </Button>
+                )}
+                {coachReview.mode === "retry" && coachReview.selectedColumn != null && (
+                  <Button variant="outline" size="sm" onClick={handleNewGame}>
+                    <RotateCcw className="mr-2 h-4 w-4" />
+                    Play Again
                   </Button>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleExitCoachReview}>
@@ -890,16 +904,19 @@ function PlayContent() {
             {primaryCoachMoment && (
               <Button variant="outline" onClick={handleInspectCoachMoment}>
                 <Eye className="mr-2 h-4 w-4" />
-                Inspect
+                Review
               </Button>
             )}
-            {primaryCoachMoment && (
+            {shouldPromptCoachRetry && (
               <Button onClick={handleRetryCoachMoment}>
                 <ListRestart className="mr-2 h-4 w-4" />
                 Retry
               </Button>
             )}
-            <Button variant={primaryCoachMoment ? "outline" : "default"} onClick={handleNewGame}>
+            <Button
+              variant={shouldPromptCoachRetry ? "outline" : "default"}
+              onClick={handleNewGame}
+            >
               <RotateCcw className="mr-2 h-4 w-4" />
               Play Again
             </Button>
