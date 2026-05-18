@@ -47,8 +47,9 @@ export interface ReviewCandidateInput {
 
 const STORAGE_KEY = "knucklebones:review-queue";
 const MAX_REVIEW_ITEMS = 80;
-const MEANINGFUL_WIN_GAP = 0.12;
-const MEANINGFUL_SCORE_GAP = 8;
+// Match what the training UI makes visible: save clear non-best choices, but skip ties/noise.
+const MEANINGFUL_WIN_GAP = 0.03;
+const MEANINGFUL_SCORE_GAP = 4;
 
 function createId(): string {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
