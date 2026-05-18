@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm run build:wasm:release && next build --webpack",
-    "build:wasm": "cd wasm && wasm-pack build --target web --out-dir pkg",
-    "build:wasm:release": "cd wasm && wasm-pack build --target web --out-dir pkg --release",
-    "build:wasm:check": "command -v wasm-pack >/dev/null 2>&1 && npm run build:wasm:release || echo 'WASM build skipped: wasm-pack not found'",
+    "build:wasm": "./scripts/build-wasm.sh",
+    "build:wasm:release": "./scripts/build-wasm.sh --release",
+    "build:wasm:check": "./scripts/build-wasm.sh --release",
     "build:native": "./scripts/build-native.sh",
     "vercel-build": "./vercel-build.sh",
     "start": "next start",
