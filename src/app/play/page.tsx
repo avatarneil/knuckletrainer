@@ -44,8 +44,10 @@ import { ALL_COLUMNS } from "@/engine/types";
 import { useGame } from "@/hooks/useGame";
 import { useGameHistory } from "@/hooks/useGameHistory";
 import { useKeyboardControls } from "@/hooks/useKeyboardControls";
+import { useReviewQueue } from "@/hooks/useReviewQueue";
 import { getApiBaseUrl } from "@/lib/api";
 import { gameStorage } from "@/lib/game-storage";
+import type { ReviewCandidateInput } from "@/lib/review-queue";
 
 function PlayContent() {
   const searchParams = useSearchParams();
@@ -66,6 +68,8 @@ function PlayContent() {
 
   // Game history hook for persistence
   const gameHistory = useGameHistory();
+  const reviewQueue = useReviewQueue();
+  const captureMistake = reviewQueue.captureMistake;
 
   // Track current session ID
   const sessionIdRef = useRef<string | null>(null);
@@ -236,11 +240,21 @@ function PlayContent() {
     [gameHistory]
   );
 
+  const handleReviewCandidate = useCallback(
+    (candidate: ReviewCandidateInput) => {
+      window.setTimeout(() => {
+        captureMistake(candidate);
+      }, 0);
+    },
+    [captureMistake]
+  );
+
   const game = useGame({
     difficulty: gameDifficulty,
     initialState: gameInitialState,
     mode: "ai",
     onGameEnd: handleGameEnd,
+    onReviewCandidate: handleReviewCandidate,
     onStateChange: handleStateChange,
     trainingMode: gameTrainingMode,
   });
@@ -506,6 +520,18 @@ function PlayContent() {
 
           <ThemeSwitcher />
 
+          <Link href="/review">
+            <Button variant="outline" size="sm" className="px-[clamp(0.5rem,1.5vw,0.75rem)]">
+              <History className="h-4 w-4" />
+              <span className="hidden xs:inline ml-2">Review</span>
+              {reviewQueue.unresolvedCount > 0 && (
+                <span className="ml-1 rounded-full bg-accent px-1.5 py-0.5 text-[0.625rem] leading-none text-accent-foreground">
+                  {reviewQueue.unresolvedCount}
+                </span>
+              )}
+            </Button>
+          </Link>
+
           <Button
             variant="ghost"
             size="icon"
@@ -696,6 +722,14 @@ function PlayContent() {
             <Button variant="outline" onClick={() => setShowGameOver(false)}>
               View Board
             </Button>
+            {reviewQueue.items.length > 0 && (
+              <Button asChild variant="secondary">
+                <Link href="/review">
+                  <History className="mr-2 h-4 w-4" />
+                  Review Mistakes
+                </Link>
+              </Button>
+            )}
             <Button onClick={handleNewGame}>
               <RotateCcw className="mr-2 h-4 w-4" />
               Play Again
