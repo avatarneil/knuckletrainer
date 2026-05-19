@@ -54,9 +54,12 @@ export function DiceRoller({
   }, [isRolling, currentDie]);
 
   return (
-    <div className="flex flex-col items-center gap-[clamp(0.25rem,1vmin,0.75rem)] p-[clamp(0.5rem,1.5vmin,1rem)] rounded-xl sm:rounded-2xl bg-card/70 border border-border/50">
+    <section
+      aria-label={`${playerName} dice controls`}
+      className="flex flex-col items-center gap-[clamp(0.25rem,1vmin,0.75rem)] p-[clamp(0.5rem,1.5vmin,1rem)] rounded-xl sm:rounded-2xl bg-card/70 border border-border/50"
+    >
       {/* Current die display */}
-      <div className="relative">
+      <div className="relative" aria-live="polite" aria-atomic="true">
         {currentDie || isRolling ? (
           <Die
             value={displayValue}
@@ -67,6 +70,7 @@ export function DiceRoller({
         ) : (
           <div className="w-[clamp(2.5rem,8vmin,5rem)] h-[clamp(2.5rem,8vmin,5rem)] rounded-lg border-2 border-dashed border-muted-foreground/30 flex items-center justify-center">
             <Dices className="w-[clamp(1.25rem,4vmin,2.5rem)] h-[clamp(1.25rem,4vmin,2.5rem)] text-muted-foreground/50" />
+            <span className="sr-only">No die rolled yet</span>
           </div>
         )}
       </div>
@@ -79,6 +83,7 @@ export function DiceRoller({
           variant="accent"
           size="default"
           className="font-bold text-[clamp(0.875rem,2.5vw,1rem)]"
+          aria-label={isRolling ? "Rolling die" : "Roll die"}
         >
           <Dices className="mr-[clamp(0.375rem,1vw,0.5rem)] h-[clamp(1rem,3vw,1.25rem)] w-[clamp(1rem,3vw,1.25rem)]" />
           {isRolling ? "Rolling..." : "Roll Dice"}
@@ -97,6 +102,6 @@ export function DiceRoller({
       ) : (
         <div className="text-[clamp(0.75rem,2vw,0.875rem)] text-muted-foreground">Waiting...</div>
       )}
-    </div>
+    </section>
   );
 }

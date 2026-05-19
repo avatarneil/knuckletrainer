@@ -105,6 +105,20 @@ export function useGame(options: UseGameOptions): UseGameReturn {
     [options.mode]
   );
 
+  useEffect(() => {
+    if (
+      !isTrainingMode ||
+      moveAnalysis !== null ||
+      state.phase !== "placing" ||
+      state.currentPlayer !== "player1" ||
+      options.mode !== "ai"
+    ) {
+      return;
+    }
+
+    runMoveAnalysis(state);
+  }, [isTrainingMode, moveAnalysis, options.mode, runMoveAnalysis, state]);
+
   const handleAITurn = useCallback(
     (gameState: GameState) => {
       const isAIMode = options.mode === "ai" || options.mode === "ai-vs-ai";

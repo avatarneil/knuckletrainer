@@ -32,6 +32,7 @@ import { useReviewQueue } from "@/hooks/useReviewQueue";
 export default function Home() {
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("medium");
   const [trainingMode, setTrainingMode] = useState(false);
+  const difficultyCount = Object.keys(DIFFICULTY_CONFIGS).length;
   const reviewQueue = useReviewQueue();
 
   return (
@@ -73,7 +74,9 @@ export default function Home() {
               <Swords className="w-5 h-5 text-primary" />
               Play vs AI
             </CardTitle>
-            <CardDescription>Challenge the computer at 5 difficulty levels</CardDescription>
+            <CardDescription>
+              Challenge the computer at {difficultyCount} difficulty levels
+            </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Difficulty Select */}

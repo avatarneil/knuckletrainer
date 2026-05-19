@@ -1,7 +1,7 @@
 {
   "name": "KnuckleTrainer - Master Knucklebones",
   "short_name": "KnuckleTrainer",
-  "description": "Master Knucklebones, the dice game from Cult of the Lamb. Train against AI opponents with 5 difficulty levels and win probability analysis.",
+  "description": "Master Knucklebones, the dice game from Cult of the Lamb. Train against AI opponents with 8 difficulty levels and win probability analysis.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#12100e",
